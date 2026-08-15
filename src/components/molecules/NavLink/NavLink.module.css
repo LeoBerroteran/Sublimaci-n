@@ -1,0 +1,19 @@
+.navLink {
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-weight: 500;
+  color: var(--text, #333333);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm, 8px);
+  transition: var(--transition, all 0.3s ease);
+}
+
+.navLink:hover {
+  background-color: var(--neutral-light, #f0f0ed);
+  color: var(--primary, #a97382);
+}
+
+.navLink.active {
+  color: var(--primary, #a97382);
+  background-color: var(--secondary-light, #e4c4c6);
+}

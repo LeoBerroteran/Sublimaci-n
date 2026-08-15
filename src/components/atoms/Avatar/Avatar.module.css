@@ -1,0 +1,30 @@
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
+  color: #ffffff;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.sm {
+  width: 26px;
+  height: 26px;
+  font-size: 0.8rem;
+}
+
+.md {
+  width: 36px;
+  height: 36px;
+  font-size: 1rem;
+}
+
+.lg {
+  width: 56px;
+  height: 56px;
+  font-size: 1.6rem;
+}

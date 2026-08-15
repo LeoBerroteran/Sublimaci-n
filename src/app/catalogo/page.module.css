@@ -1,0 +1,42 @@
+.catalogHeader {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.title {
+  font-size: 2.6rem;
+  color: var(--dark);
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: var(--text-light);
+  font-size: 1.1rem;
+  margin-bottom: 32px;
+}
+
+.searchWrapper {
+  max-width: 500px;
+  margin: 0 auto 24px;
+}
+
+.filterGroup {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.noResults {
+  text-align: center;
+  padding: 60px 20px;
+  background-color: var(--white);
+  border-radius: var(--radius);
+  color: var(--text-light);
+}
+
+.noResults h3 {
+  font-size: 1.4rem;
+  color: var(--dark);
+  margin-bottom: 8px;
+}

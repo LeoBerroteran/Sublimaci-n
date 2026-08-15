@@ -1,0 +1,26 @@
+.formField {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.label {
+  font-family: var(--font-heading);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text, #333333);
+  margin-bottom: 6px;
+}
+
+.required {
+  color: #e53935;
+  margin-left: 4px;
+}
+
+.errorMessage {
+  margin-top: 6px;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: #e53935;
+}

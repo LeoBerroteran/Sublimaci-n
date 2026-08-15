@@ -1,0 +1,47 @@
+.statCard {
+  background-color: var(--bg, #ffffff);
+  border-radius: var(--radius, 12px);
+  box-shadow: var(--shadow, rgba(0,0,0,0.08));
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.topBorder {
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary, #a97382), var(--accent, #c3a920));
+  width: 100%;
+}
+
+.content {
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.textContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.value {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text, #333333);
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.label {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--text-light, #666666);
+}
+
+.icon {
+  font-size: 1.5rem;
+  opacity: 0.8;
+}

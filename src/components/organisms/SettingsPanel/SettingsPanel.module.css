@@ -1,0 +1,55 @@
+.container {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .container {
+    grid-template-columns: 1fr 2fr;
+  }
+}
+
+.rateCard {
+  background: var(--primary);
+  color: white;
+  padding: 2rem;
+  border-radius: var(--radius);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.rateCard h3 {
+  margin: 0 0 1rem 0;
+  font-family: var(--font-heading);
+}
+
+.rateValue {
+  font-size: 3rem;
+  font-weight: bold;
+  font-family: var(--font-heading);
+}
+
+.rateDate {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.form {
+  background: white;
+  padding: 2rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form h3 {
+  margin: 0;
+  font-family: var(--font-heading);
+  color: var(--text);
+}

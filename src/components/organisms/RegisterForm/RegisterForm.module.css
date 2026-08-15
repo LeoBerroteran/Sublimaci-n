@@ -1,0 +1,31 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.criteria {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.met {
+  color: #4caf50;
+}
+
+.met::before {
+  content: '✓ ';
+}
+
+.unmet {
+  color: var(--text-light);
+}
+
+.unmet::before {
+  content: '○ ';
+}

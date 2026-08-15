@@ -1,0 +1,44 @@
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.imageWrapper {
+  position: relative;
+  filter: drop-shadow(0 4px 6px var(--shadow));
+}
+
+.text {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Sizes */
+.sm .imageWrapper {
+  width: 32px;
+  height: 32px;
+}
+.sm .text {
+  font-size: 1.25rem;
+}
+
+.md .imageWrapper {
+  width: 48px;
+  height: 48px;
+}
+.md .text {
+  font-size: 1.5rem;
+}
+
+.lg .imageWrapper {
+  width: 64px;
+  height: 64px;
+}
+.lg .text {
+  font-size: 2rem;
+}

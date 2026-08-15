@@ -1,0 +1,95 @@
+.btn, .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+}
+
+.btn:disabled, .button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+/* Sizes */
+.sm {
+  padding: 8px 18px;
+  font-size: 0.85rem;
+}
+
+.md {
+  padding: 12px 28px;
+  font-size: 0.95rem;
+}
+
+.lg {
+  padding: 16px 36px;
+  font-size: 1.1rem;
+}
+
+/* Variants */
+.primary {
+  background-color: var(--primary);
+  color: #ffffff;
+}
+.primary:hover:not(:disabled) {
+  background-color: var(--primary-dark);
+  box-shadow: 0 4px 15px rgba(169, 115, 130, 0.4);
+  transform: translateY(-1px);
+}
+
+.outline {
+  background-color: transparent;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+}
+.outline:hover:not(:disabled) {
+  background-color: var(--primary);
+  color: #ffffff;
+}
+
+.accent {
+  background-color: var(--accent);
+  color: #ffffff;
+}
+.accent:hover:not(:disabled) {
+  background-color: var(--accent-dark);
+  box-shadow: 0 4px 15px rgba(195, 169, 32, 0.4);
+  transform: translateY(-1px);
+}
+
+.whatsapp {
+  background-color: #25d366;
+  color: #ffffff;
+}
+.whatsapp:hover:not(:disabled) {
+  background-color: #1da851;
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+  transform: translateY(-1px);
+}
+
+.danger {
+  background-color: var(--error);
+  color: #ffffff;
+}
+.danger:hover:not(:disabled) {
+  background-color: #c62828;
+}
+
+.secondary {
+  background-color: var(--secondary-light);
+  color: var(--primary-dark);
+}
+.secondary:hover:not(:disabled) {
+  background-color: var(--secondary);
+}
