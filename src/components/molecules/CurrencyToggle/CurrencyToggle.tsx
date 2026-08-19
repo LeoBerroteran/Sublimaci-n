@@ -3,8 +3,14 @@
 import React from 'react';
 import { useCurrency } from '@/context/CurrencyContext';
 
-export default function CurrencyToggle() {
+interface CurrencyToggleProps {
+  size?: 'sm' | 'md';
+}
+
+export default function CurrencyToggle({ size = 'md' }: CurrencyToggleProps) {
   const { current, setCurrency } = useCurrency();
+
+  const isSmall = size === 'sm';
 
   const containerStyle: React.CSSProperties = {
     display: 'inline-flex',
@@ -16,16 +22,17 @@ export default function CurrencyToggle() {
   };
 
   const getBtnStyle = (isActive: boolean): React.CSSProperties => ({
-    padding: '7px 16px',
-    borderRadius: '22px',
+    padding: isSmall ? '5px 12px' : '6px 14px',
+    borderRadius: '20px',
     border: 'none',
     backgroundColor: isActive ? 'var(--primary)' : 'transparent',
     color: isActive ? '#ffffff' : 'var(--text-light)',
     boxShadow: isActive ? '0 2px 8px rgba(169, 115, 130, 0.3)' : 'none',
     cursor: 'pointer',
     fontWeight: 600,
-    fontSize: '0.85rem',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    fontSize: isSmall ? '0.78rem' : '0.82rem',
+    transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+    whiteSpace: 'nowrap',
   });
 
   return (

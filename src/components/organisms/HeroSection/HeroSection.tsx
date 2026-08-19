@@ -26,7 +26,7 @@ export default function HeroSection() {
 
   return (
     <section className="hero">
-      <div className="container">
+      <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <div className="hero-content">
           <h1 className="hero-title">
             Diseños que <span className="text-accent">Inspiran</span>

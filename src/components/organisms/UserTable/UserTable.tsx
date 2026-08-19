@@ -22,15 +22,25 @@ export default function UserTable() {
   const [editRole, setEditRole] = useState<'admin' | 'cliente'>('cliente');
   const [saving, setSaving] = useState(false);
 
-  const loadUsers = useCallback(async () => {
+  const loadUsers = useCallback(async (showFeedback = false) => {
     setLoading(true);
-    const data = await getUsers();
-    setUsers(data);
-    setLoading(false);
-  }, [getUsers]);
+    try {
+      const data = await getUsers();
+      setUsers(data);
+      if (showFeedback) {
+        showToast('Lista de usuarios actualizada', 'success');
+      }
+    } catch {
+      if (showFeedback) {
+        showToast('Error al actualizar usuarios', 'error');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [getUsers, showToast]);
 
   useEffect(() => {
-    loadUsers();
+    loadUsers(false);
   }, [loadUsers]);
 
   const handleOpenEdit = (user: User) => {
@@ -81,16 +91,23 @@ export default function UserTable() {
   const isPrimaryAdmin = editingUser?.email === 'admin@subli.com' || editingUser?.mail === 'admin@subli.com';
 
   return (
-    <div className="admin-card" style={{ backgroundColor: 'var(--white)', padding: '28px', borderRadius: 'var(--radius)', boxShadow: '0 2px 12px var(--shadow)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2 style={{ fontSize: '1.6rem', margin: 0, color: 'var(--dark)' }}>Gestión de Usuarios</h2>
-        <Button variant="outline" size="sm" onClick={loadUsers} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Actualizar
+    <div className="admin-card">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+        <h2 style={{ fontSize: 'clamp(1.25rem, 3.5vw, 1.6rem)', margin: 0, color: 'var(--dark)' }}>Gestión de Usuarios</h2>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => loadUsers(true)}
+          disabled={loading}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+        >
+          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+          {loading ? 'Actualizando...' : 'Actualizar'}
         </Button>
       </div>
       
-      <div style={{ overflowX: 'auto' }}>
-        <table className="admin-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div className="admin-table-wrapper">
+        <table className="admin-table">
           <thead>
             <tr style={{ borderBottom: '2px solid var(--neutral)', textTransform: 'uppercase', fontSize: '0.85rem', color: 'var(--text-light)' }}>
               <th style={{ padding: '14px 16px', textAlign: 'left' }}>Nombre</th>

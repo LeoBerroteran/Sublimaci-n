@@ -17,20 +17,12 @@ export default function AdminSidebar({ activeSection, onNavigate }: AdminSidebar
   ];
 
   return (
-    <aside
-      style={{
-        backgroundColor: 'var(--darker)',
-        padding: '28px 20px',
-        color: '#ffffff',
-        minHeight: 'calc(100vh - 72px)',
-        borderRight: '1px solid rgba(255, 255, 255, 0.08)',
-      }}
-    >
-      <div style={{ marginBottom: '28px', paddingBottom: '16px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+    <aside className="admin-sidebar-container">
+      <div className="admin-sidebar-logo">
         <Logo size="sm" />
       </div>
 
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      <nav className="admin-sidebar-nav">
         {items.map((item) => {
           const isActive = activeSection === item.id;
           return (
@@ -38,24 +30,10 @@ export default function AdminSidebar({ activeSection, onNavigate }: AdminSidebar
               key={item.id}
               type="button"
               onClick={() => onNavigate(item.id)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '12px 18px',
-                borderRadius: 'var(--radius-sm)',
-                border: 'none',
-                backgroundColor: isActive ? 'var(--primary)' : 'transparent',
-                color: isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.75)',
-                fontWeight: isActive ? 600 : 500,
-                fontSize: '0.95rem',
-                cursor: 'pointer',
-                textAlign: 'left',
-                transition: 'all 0.2s ease',
-              }}
+              className={`admin-nav-item ${isActive ? 'active' : ''}`}
             >
-              <span style={{ fontSize: '1.2rem' }}>{item.icon}</span>
-              <span>{item.label}</span>
+              <span className="admin-nav-icon">{item.icon}</span>
+              <span className="admin-nav-label">{item.label}</span>
             </button>
           );
         })}

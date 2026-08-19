@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { fetchProducts, mapDbProductToProduct } from '@/data/products';
+import { fetchProducts } from '@/data/products';
 import { Product } from '@/types';
 import { createClient } from '@/lib/supabase/client';
 import Button from '@/components/atoms/Button/Button';
@@ -10,7 +10,7 @@ import PriceTag from '@/components/atoms/PriceTag/PriceTag';
 import Modal from '@/components/organisms/Modal/Modal';
 import FormField from '@/components/molecules/FormField/FormField';
 import { useToast } from '@/hooks/useToast';
-import { Plus, Edit2, Trash2, RefreshCw } from 'lucide-react';
+import { Plus, Edit2, Trash2, RefreshCw, Image as ImageIcon, Upload } from 'lucide-react';
 
 export default function ProductTable() {
   const [productList, setProductList] = useState<Product[]>([]);
@@ -19,7 +19,6 @@ export default function ProductTable() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
-  const supabase = createClient();
 
   // Form states
   const [name, setName] = useState('');
@@ -28,17 +27,28 @@ export default function ProductTable() {
   const [description, setDescription] = useState('');
   const [materials, setMaterials] = useState('');
   const [printArea, setPrintArea] = useState('');
+  const [image, setImage] = useState('');
   const [badge, setBadge] = useState<'Popular' | 'Nuevo' | null>(null);
 
-  const loadProducts = useCallback(async () => {
+  const loadProducts = useCallback(async (showFeedback = false) => {
     setLoading(true);
-    const data = await fetchProducts();
-    setProductList(data);
-    setLoading(false);
-  }, []);
+    try {
+      const data = await fetchProducts();
+      setProductList(data);
+      if (showFeedback) {
+        showToast('Lista de productos actualizada', 'success');
+      }
+    } catch (err: any) {
+      if (showFeedback) {
+        showToast('Error al actualizar productos', 'error');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [showToast]);
 
   useEffect(() => {
-    loadProducts();
+    loadProducts(false);
   }, [loadProducts]);
 
   const handleOpenAdd = () => {
@@ -49,25 +59,43 @@ export default function ProductTable() {
     setDescription('');
     setMaterials('');
     setPrintArea('');
+    setImage('/img/taza_personalizada.jpg');
     setBadge(null);
     setIsModalOpen(true);
   };
 
   const handleOpenEdit = (product: Product) => {
     setEditingProduct(product);
-    setName(product.name);
+    setName(product.name || '');
     setCategory((product.category as 'sublimacion' | 'papeleria') || 'sublimacion');
-    setPrice(product.price);
-    setDescription(product.description);
+    setPrice(product.price || 0);
+    setDescription(product.description || '');
     setMaterials(product.materials || '');
     setPrintArea(product.printArea || product.print_area || '');
-    setBadge(product.badge as 'Popular' | 'Nuevo' | null);
+    setImage(product.image || '');
+    setBadge((product.badge as 'Popular' | 'Nuevo') || null);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingProduct(null);
+  };
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        showToast('La imagen debe ser menor a 2MB', 'warning');
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setImage(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -79,7 +107,12 @@ export default function ProductTable() {
     }
 
     setSaving(true);
+    const supabase = createClient();
+
     try {
+      const finalImage = image.trim() || (category === 'sublimacion' ? '/img/taza_personalizada.jpg' : '/img/cuaderno_personalizado.jpg');
+      const defaultIcon = category === 'sublimacion' ? '☕' : '📓';
+
       if (editingProduct) {
         // Edit existing product in Supabase
         const { error } = await supabase
@@ -92,6 +125,7 @@ export default function ProductTable() {
             description,
             materials,
             print_area: printArea,
+            image: finalImage,
             badge,
             update_date: new Date().toISOString(),
           })
@@ -102,13 +136,10 @@ export default function ProductTable() {
         } else {
           showToast(`Producto "${name}" actualizado con éxito`, 'success');
           handleCloseModal();
-          await loadProducts();
+          await loadProducts(false);
         }
       } else {
         // Add new product in Supabase
-        const defaultImage = category === 'sublimacion' ? '/img/taza_personalizada.jpg' : '/img/cuaderno_personalizado.jpg';
-        const defaultIcon = category === 'sublimacion' ? '☕' : '📓';
-
         const { error } = await supabase
           .from('Products')
           .insert({
@@ -121,7 +152,7 @@ export default function ProductTable() {
             sizes: ['Estándar'],
             print_area: printArea,
             icon: defaultIcon,
-            image: defaultImage,
+            image: finalImage,
             featured: false,
             badge,
             creation_date: new Date().toISOString(),
@@ -134,7 +165,7 @@ export default function ProductTable() {
         } else {
           showToast(`Producto "${name}" agregado con éxito`, 'success');
           handleCloseModal();
-          await loadProducts();
+          await loadProducts(false);
         }
       }
     } catch (err: any) {
@@ -147,6 +178,7 @@ export default function ProductTable() {
   const handleDelete = async (id: string | number, prodName: string) => {
     if (confirm(`¿Estás seguro de eliminar el producto "${prodName}"?`)) {
       try {
+        const supabase = createClient();
         const { error } = await supabase
           .from('Products')
           .update({ deleted: true, update_date: new Date().toISOString() })
@@ -156,7 +188,7 @@ export default function ProductTable() {
           showToast(`Error al eliminar: ${error.message}`, 'error');
         } else {
           showToast(`Producto "${prodName}" eliminado`, 'info');
-          await loadProducts();
+          await loadProducts(false);
         }
       } catch (err: any) {
         showToast(err.message || 'Error al eliminar', 'error');
@@ -165,12 +197,19 @@ export default function ProductTable() {
   };
 
   return (
-    <div style={{ backgroundColor: 'var(--white)', padding: '28px', borderRadius: 'var(--radius)', boxShadow: '0 2px 12px var(--shadow)' }}>
+    <div className="admin-card">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <h2 style={{ fontSize: '1.6rem', margin: 0, color: 'var(--dark)' }}>Catálogo de Productos ({productList.length})</h2>
-          <Button variant="outline" size="sm" onClick={loadProducts} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Actualizar
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <h2 style={{ fontSize: 'clamp(1.25rem, 3.5vw, 1.6rem)', margin: 0, color: 'var(--dark)' }}>Catálogo de Productos ({productList.length})</h2>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => loadProducts(true)}
+            disabled={loading}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+          >
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+            {loading ? 'Actualizando...' : 'Actualizar'}
           </Button>
         </div>
         <Button variant="primary" onClick={handleOpenAdd} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
@@ -178,8 +217,8 @@ export default function ProductTable() {
         </Button>
       </div>
 
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div className="admin-table-wrapper">
+        <table className="admin-table">
           <thead>
             <tr style={{ borderBottom: '2px solid var(--neutral)', textTransform: 'uppercase', fontSize: '0.85rem', color: 'var(--text-light)' }}>
               <th style={{ padding: '12px', textAlign: 'left' }}>#</th>
@@ -212,7 +251,7 @@ export default function ProductTable() {
                     <img
                       src={product.image || '/img/logo.png'}
                       alt={product.name}
-                      style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px' }}
+                      style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--neutral)' }}
                     />
                   </td>
                   <td style={{ padding: '12px', fontWeight: 600, color: 'var(--dark)' }}>{product.name}</td>
@@ -250,7 +289,7 @@ export default function ProductTable() {
 
       {/* ADD / EDIT PRODUCT MODAL */}
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '12px 0' }}>
+        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '12px 0', maxHeight: '80vh', overflowY: 'auto' }}>
           <h3 style={{ margin: 0, color: 'var(--dark)', fontSize: '1.4rem' }}>
             {editingProduct ? `Editar Producto: ${editingProduct.name}` : 'Agregar Nuevo Producto'}
           </h3>
@@ -282,6 +321,7 @@ export default function ProductTable() {
                   border: '2px solid var(--neutral-dark)',
                   backgroundColor: 'var(--white)',
                   fontSize: '1rem',
+                  outline: 'none',
                 }}
               >
                 <option value="sublimacion">Sublimación</option>
@@ -308,10 +348,86 @@ export default function ProductTable() {
                   border: '2px solid var(--neutral-dark)',
                   backgroundColor: 'var(--white)',
                   fontSize: '1rem',
+                  outline: 'none',
                 }}
                 required
               />
             </div>
+          </div>
+
+          {/* IMAGE SECTION WITH PREVIEW & UPLOAD */}
+          <div>
+            <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px', fontSize: '0.9rem', color: 'var(--dark)' }}>
+              Imagen del Producto:
+            </label>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <div style={{ flex: 1 }}>
+                <input
+                  type="text"
+                  value={image}
+                  onChange={(e) => setImage(e.target.value)}
+                  placeholder="URL de imagen o ruta (/img/... o https://...)"
+                  disabled={saving}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '2px solid var(--neutral-dark)',
+                    backgroundColor: 'var(--white)',
+                    fontSize: '0.95rem',
+                    outline: 'none',
+                  }}
+                />
+              </div>
+              <label
+                style={{
+                  padding: '10px 14px',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '2px dashed var(--primary)',
+                  backgroundColor: 'var(--neutral-light)',
+                  color: 'var(--primary)',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <Upload size={16} /> Subir archivo
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageFileChange}
+                  style={{ display: 'none' }}
+                  disabled={saving}
+                />
+              </label>
+            </div>
+
+            {/* Live Image Preview */}
+            {image && (
+              <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <img
+                  src={image}
+                  alt="Vista previa"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/img/logo.png';
+                  }}
+                  style={{
+                    width: '64px',
+                    height: '64px',
+                    objectFit: 'cover',
+                    borderRadius: '8px',
+                    border: '1px solid var(--neutral-dark)',
+                  }}
+                />
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-light)' }}>
+                  Vista previa de la imagen
+                </span>
+              </div>
+            )}
           </div>
 
           <FormField
@@ -358,6 +474,7 @@ export default function ProductTable() {
                 border: '2px solid var(--neutral-dark)',
                 backgroundColor: 'var(--white)',
                 fontSize: '1rem',
+                outline: 'none',
               }}
             >
               <option value="">Sin insignia</option>

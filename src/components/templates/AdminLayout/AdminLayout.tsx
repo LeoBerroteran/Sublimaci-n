@@ -22,17 +22,9 @@ export default function AdminLayout({
   }
 
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '260px 1fr',
-        minHeight: 'calc(100vh - 72px)',
-        width: '100%',
-        backgroundColor: 'var(--bg)',
-      }}
-    >
+    <div className="admin-grid-layout">
       <AdminSidebar activeSection={activeSection} onNavigate={onNavigate} />
-      <div style={{ padding: '36px', overflowY: 'auto' }}>{children}</div>
+      <div className="admin-main-content">{children}</div>
     </div>
   );
 }
