@@ -24,10 +24,10 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
 
   const fetchUserProfile = useCallback(async (authUserId?: string, email?: string): Promise<User | null> => {
     try {
+      const supabase = createClient();
       let query = supabase.from('Users').select('*');
       if (authUserId) {
         query = query.eq('id', authUserId);
@@ -40,7 +40,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data, error } = await query.maybeSingle();
 
       if (error || !data) {
-        // Fallback profile if row in public.Users doesn't exist yet
         if (email) {
           const isAdmin = email === 'admin@subli.com';
           return {
@@ -68,12 +67,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       return null;
     }
-  }, [supabase]);
+  }, []);
 
   const refreshUser = useCallback(async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
+      const supabase = createClient();
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (user && !error) {
         const profile = await fetchUserProfile(user.id, user.email);
         setCurrentUser(profile);
       } else {
@@ -84,28 +84,63 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [supabase, fetchUserProfile]);
+  }, [fetchUserProfile]);
 
   useEffect(() => {
-    refreshUser();
+    let isMounted = true;
+    const supabase = createClient();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        const profile = await fetchUserProfile(session.user.id, session.user.email);
-        setCurrentUser(profile);
-      } else {
-        setCurrentUser(null);
+    async function init() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (isMounted) {
+          if (user) {
+            const profile = await fetchUserProfile(user.id, user.email);
+            setCurrentUser(profile);
+          } else {
+            setCurrentUser(null);
+          }
+        }
+      } catch {
+        if (isMounted) setCurrentUser(null);
+      } finally {
+        if (isMounted) setLoading(false);
       }
-      setLoading(false);
-    });
+    }
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [supabase, fetchUserProfile, refreshUser]);
+    init();
+
+    try {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: any, session: any) => {
+        if (!isMounted) return;
+        try {
+          if (session?.user) {
+            const profile = await fetchUserProfile(session.user.id, session.user.email);
+            setCurrentUser(profile);
+          } else {
+            setCurrentUser(null);
+          }
+        } catch {
+          setCurrentUser(null);
+        } finally {
+          setLoading(false);
+        }
+      });
+
+      return () => {
+        isMounted = false;
+        subscription.unsubscribe();
+      };
+    } catch {
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [fetchUserProfile]);
 
   const login = useCallback(async (email: string, password: string): Promise<{ success: boolean; message: string }> => {
     try {
+      const supabase = createClient();
       const cleanEmail = email.trim().toLowerCase();
       const { data, error } = await supabase.auth.signInWithPassword({
         email: cleanEmail,
@@ -113,7 +148,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
-        // Fallback message for common errors
         if (error.message.includes('Invalid login credentials')) {
           return { success: false, message: 'Correo o contraseña incorrectos' };
         }
@@ -129,20 +163,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err: any) {
       return { success: false, message: err.message || 'Error al iniciar sesión' };
     }
-  }, [supabase, fetchUserProfile]);
+  }, [fetchUserProfile]);
 
   const logout = useCallback(async () => {
     try {
+      const supabase = createClient();
       await supabase.auth.signOut();
       setCurrentUser(null);
     } catch (err) {
       console.error('Logout error:', err);
       setCurrentUser(null);
     }
-  }, [supabase]);
+  }, []);
 
   const register = useCallback(async (name: string, email: string, password: string, lastName: string = ''): Promise<{ success: boolean; message: string }> => {
     try {
+      const supabase = createClient();
       const cleanEmail = email.trim().toLowerCase();
       const { data, error } = await supabase.auth.signUp({
         email: cleanEmail,
@@ -160,7 +196,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.user) {
-        // Upsert into public.Users in case trigger delay
         await supabase.from('Users').upsert({
           id: data.user.id,
           name,
@@ -181,10 +216,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err: any) {
       return { success: false, message: err.message || 'Error al registrar usuario' };
     }
-  }, [supabase, fetchUserProfile]);
+  }, [fetchUserProfile]);
 
   const getUsers = useCallback(async (): Promise<User[]> => {
     try {
+      const supabase = createClient();
       const { data, error } = await supabase
         .from('Users')
         .select('*')
@@ -206,10 +242,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       return [];
     }
-  }, [supabase]);
+  }, []);
 
   const updateUser = useCallback(async (userIdOrEmail: string, updates: Partial<User>): Promise<{ success: boolean; message: string }> => {
     try {
+      const supabase = createClient();
       const dbUpdates: any = {
         update_date: new Date().toISOString(),
       };
@@ -233,7 +270,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err: any) {
       return { success: false, message: err.message || 'Error al actualizar usuario' };
     }
-  }, [supabase, refreshUser]);
+  }, [refreshUser]);
 
   const deleteUser = useCallback(async (userIdOrEmail: string): Promise<{ success: boolean; message: string }> => {
     try {
@@ -241,6 +278,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { success: false, message: 'No se puede eliminar la cuenta de Administrador Principal' };
       }
 
+      const supabase = createClient();
       let query = supabase.from('Users').update({ deleted: true, update_date: new Date().toISOString() });
       if (userIdOrEmail.includes('@')) {
         query = query.eq('mail', userIdOrEmail);
@@ -255,13 +293,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err: any) {
       return { success: false, message: err.message || 'Error al eliminar usuario' };
     }
-  }, [supabase]);
+  }, []);
 
   const updateProfile = useCallback(async (updates: { name?: string; email?: string; currentPassword?: string; newPassword?: string }): Promise<{ success: boolean; message: string }> => {
     try {
       if (!currentUser) return { success: false, message: 'No hay sesión activa' };
 
-      // Update auth email or password if requested
+      const supabase = createClient();
       const authUpdates: any = {};
       if (updates.email && updates.email !== currentUser.email) {
         authUpdates.email = updates.email;
@@ -275,7 +313,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (authError) return { success: false, message: authError.message };
       }
 
-      // Update public.Users table
       if (updates.name || updates.email) {
         const dbUpdates: any = { update_date: new Date().toISOString() };
         if (updates.name) dbUpdates.name = updates.name;
@@ -293,7 +330,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err: any) {
       return { success: false, message: err.message || 'Error al actualizar perfil' };
     }
-  }, [currentUser, supabase, refreshUser]);
+  }, [currentUser, refreshUser]);
 
   return (
     <AuthContext.Provider

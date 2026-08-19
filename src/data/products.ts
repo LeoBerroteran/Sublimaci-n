@@ -19,14 +19,14 @@ export const PRODUCTS: Product[] = [
 export function mapDbProductToProduct(row: any): Product {
   return {
     id: row.id,
-    name: row.name,
+    name: row.name || 'Producto sin nombre',
     category: row.category || 'sublimacion',
     description: row.description || '',
     price: Number(row.base_price ?? row.price ?? 0),
     base_price: Number(row.base_price ?? 0),
     discount_price: Number(row.discount_price ?? 0),
     materials: row.materials || '',
-    sizes: Array.isArray(row.sizes) ? row.sizes : ['Estándar'],
+    sizes: Array.isArray(row.sizes) && row.sizes.length > 0 ? row.sizes : ['Estándar'],
     printArea: row.print_area || row.printArea || '',
     print_area: row.print_area || row.printArea || '',
     icon: row.icon || (row.category === 'papeleria' ? '📓' : '☕'),
@@ -42,11 +42,17 @@ export function mapDbProductToProduct(row: any): Product {
 export async function fetchProducts(): Promise<Product[]> {
   try {
     const supabase = createClient();
-    const { data, error } = await supabase
+    const queryPromise = supabase
       .from('Products')
       .select('*')
       .eq('deleted', false)
       .order('creation_date', { ascending: true });
+
+    const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) =>
+      setTimeout(() => resolve({ data: null, error: new Error('Timeout') }), 3000)
+    );
+
+    const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
 
     if (error || !data || data.length === 0) {
       return PRODUCTS;
@@ -60,12 +66,18 @@ export async function fetchProducts(): Promise<Product[]> {
 export async function fetchProductById(id: string | number): Promise<Product | undefined> {
   try {
     const supabase = createClient();
-    const { data, error } = await supabase
+    const queryPromise = supabase
       .from('Products')
       .select('*')
       .eq('id', id)
       .eq('deleted', false)
-      .single();
+      .maybeSingle();
+
+    const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) =>
+      setTimeout(() => resolve({ data: null, error: new Error('Timeout') }), 3000)
+    );
+
+    const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
 
     if (error || !data) {
       return PRODUCTS.find((p) => String(p.id) === String(id));

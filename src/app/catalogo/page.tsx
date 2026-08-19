@@ -2,35 +2,48 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import ProductGrid from '@/components/organisms/ProductGrid/ProductGrid';
-import { fetchProducts } from '@/data/products';
+import { fetchProducts, PRODUCTS } from '@/data/products';
 import { Product } from '@/types';
-import { Search, RefreshCw } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 export default function CatalogPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState<Product[]>(PRODUCTS);
   const [selectedCategory, setSelectedCategory] = useState<'todos' | 'sublimacion' | 'papeleria'>('todos');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const loadCatalog = async () => {
-    setLoading(true);
-    const data = await fetchProducts();
-    setProducts(data);
-    setLoading(false);
-  };
-
   useEffect(() => {
+    let isMounted = true;
+    async function loadCatalog() {
+      try {
+        const data = await fetchProducts();
+        if (isMounted && data && data.length > 0) {
+          setProducts(data);
+        }
+      } catch (err) {
+        console.error('Error fetching catalog:', err);
+      }
+    }
     loadCatalog();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const filteredProducts = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
     return products.filter((product) => {
+      const prodCat = (product.category || '').toLowerCase();
       const matchesCategory =
-        selectedCategory === 'todos' || product.category === selectedCategory;
+        selectedCategory === 'todos' ||
+        prodCat === selectedCategory ||
+        (selectedCategory === 'sublimacion' && prodCat.includes('subli')) ||
+        (selectedCategory === 'papeleria' && prodCat.includes('pape'));
+
       const matchesSearch =
-        !searchQuery.trim() ||
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase());
+        !q ||
+        (product.name || '').toLowerCase().includes(q) ||
+        (product.description || '').toLowerCase().includes(q) ||
+        prodCat.includes(q);
 
       return matchesCategory && matchesSearch;
     });
@@ -47,6 +60,7 @@ export default function CatalogPage() {
     cursor: 'pointer',
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
     boxShadow: isActive ? '0 4px 14px rgba(169, 115, 130, 0.35)' : '0 2px 6px rgba(0,0,0,0.04)',
+    userSelect: 'none',
   });
 
   return (
@@ -117,12 +131,7 @@ export default function CatalogPage() {
         </div>
       </div>
 
-      {loading && products.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-light)' }}>
-          <RefreshCw size={28} className="animate-spin" style={{ margin: '0 auto 12px' }} />
-          <p>Cargando catálogo desde Supabase...</p>
-        </div>
-      ) : filteredProducts.length > 0 ? (
+      {filteredProducts.length > 0 ? (
         <ProductGrid products={filteredProducts} />
       ) : (
         <div

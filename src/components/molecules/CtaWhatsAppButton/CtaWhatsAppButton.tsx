@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import WhatsAppIcon from '@/components/atoms/WhatsAppIcon/WhatsAppIcon';
+import { getContactWhatsAppUrl } from '@/lib/whatsapp';
 
 export default function CtaWhatsAppButton({ className }: { className?: string }) {
   const { isLoggedIn } = useAuth();
@@ -20,7 +21,8 @@ export default function CtaWhatsAppButton({ className }: { className?: string })
       return;
     }
 
-    window.open('https://wa.me/584243695379', '_blank');
+    const url = getContactWhatsAppUrl();
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (

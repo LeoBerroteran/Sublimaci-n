@@ -31,10 +31,10 @@ export default function ProductCard({ product }: ProductCardProps) {
     }
 
     const url = getWhatsAppUrl(product, product.sizes?.[0] || 'Estándar', 1);
-    window.open(url, '_blank');
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  const badgeClass = product.badge === 'Popular' ? 'badge-popular' : 'badge-nuevo';
+  const badgeClass = String(product.badge).toLowerCase() === 'popular' ? 'badge-popular' : 'badge-nuevo';
 
   return (
     <div className="product-card">

@@ -1,25 +1,27 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/atoms/Button/Button';
 import WhatsAppIcon from '@/components/atoms/WhatsAppIcon/WhatsAppIcon';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
+import { getContactWhatsAppUrl } from '@/lib/whatsapp';
 
 export default function HeroSection() {
   const { isLoggedIn } = useAuth();
   const { showToast } = useToast();
   const router = useRouter();
 
-  const handleContactWhatsApp = () => {
+  const handleContactWhatsApp = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
     if (!isLoggedIn) {
       showToast('Inicia sesión para contactar por WhatsApp', 'info');
       router.push('/login');
       return;
     }
-    window.open('https://wa.me/584243695379', '_blank');
+    const url = getContactWhatsAppUrl();
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (

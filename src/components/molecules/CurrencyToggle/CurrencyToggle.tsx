@@ -1,10 +1,10 @@
 'use client';
 
 import React from 'react';
-import { useCurrency } from '@/hooks/useCurrency';
+import { useCurrency } from '@/context/CurrencyContext';
 
 export default function CurrencyToggle() {
-  const { current, toggle } = useCurrency();
+  const { current, setCurrency } = useCurrency();
 
   const containerStyle: React.CSSProperties = {
     display: 'inline-flex',
@@ -12,6 +12,7 @@ export default function CurrencyToggle() {
     borderRadius: '24px',
     padding: '3px',
     overflow: 'hidden',
+    userSelect: 'none',
   };
 
   const getBtnStyle = (isActive: boolean): React.CSSProperties => ({
@@ -28,22 +29,18 @@ export default function CurrencyToggle() {
   });
 
   return (
-    <div style={containerStyle}>
+    <div style={containerStyle} role="group" aria-label="Cambio de Moneda">
       <button
         type="button"
         style={getBtnStyle(current === 'USD')}
-        onClick={() => {
-          if (current !== 'USD') toggle();
-        }}
+        onClick={() => setCurrency('USD')}
       >
         USD $
       </button>
       <button
         type="button"
         style={getBtnStyle(current === 'BS')}
-        onClick={() => {
-          if (current !== 'BS') toggle();
-        }}
+        onClick={() => setCurrency('BS')}
       >
         BS Bs.
       </button>

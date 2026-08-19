@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Product } from '@/types';
 import Button from '@/components/atoms/Button/Button';
@@ -24,7 +25,19 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || 'Estándar');
 
-  const handleOrderWhatsApp = () => {
+  const handleDecrease = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+  };
+
+  const handleIncrease = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setQuantity((prev) => prev + 1);
+  };
+
+  const handleOrderWhatsApp = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+
     if (!isLoggedIn) {
       showToast('Inicia sesión para realizar pedidos por WhatsApp', 'info');
       router.push('/login');
@@ -32,19 +45,27 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     }
 
     const whatsappUrl = getWhatsAppUrl(product, selectedSize, quantity);
-    window.open(whatsappUrl, '_blank');
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   };
 
   return (
     <div className="product-detail-container" style={{ maxWidth: '1100px', margin: '0 auto' }}>
-      <button
-        type="button"
-        onClick={() => router.back()}
+      <Link
+        href="/catalogo"
         className="btn btn-outline btn-sm"
-        style={{ marginBottom: '24px', cursor: 'pointer' }}
+        style={{
+          marginBottom: '24px',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
+          cursor: 'pointer',
+          textDecoration: 'none',
+          padding: '8px 16px',
+          borderRadius: 'var(--radius-sm)',
+        }}
       >
         <ArrowLeft size={16} /> Volver al catálogo
-      </button>
+      </Link>
 
       <div className="product-detail">
         <div
@@ -78,10 +99,10 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 <span className="spec-value">{product.materials}</span>
               </div>
             )}
-            {product.printArea && (
+            {(product.printArea || product.print_area) && (
               <div className="spec-item">
                 <span className="spec-label">Área de Impresión:</span>
-                <span className="spec-value">{product.printArea}</span>
+                <span className="spec-value">{product.printArea || product.print_area}</span>
               </div>
             )}
           </div>
@@ -102,6 +123,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   border: '2px solid var(--neutral-dark)',
                   backgroundColor: 'var(--white)',
                   fontSize: '1rem',
+                  outline: 'none',
                 }}
               >
                 {product.sizes.map((s) => (
@@ -118,7 +140,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <button
                 type="button"
-                onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                onClick={handleDecrease}
                 aria-label="Disminuir cantidad"
                 style={{
                   width: '42px',
@@ -133,6 +155,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   justifyContent: 'center',
                   transition: 'all 0.2s ease',
                   boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
+                  outline: 'none',
                 }}
               >
                 <Minus size={18} />
@@ -159,7 +182,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
               <button
                 type="button"
-                onClick={() => setQuantity((prev) => prev + 1)}
+                onClick={handleIncrease}
                 aria-label="Aumentar cantidad"
                 style={{
                   width: '42px',
@@ -174,6 +197,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   justifyContent: 'center',
                   transition: 'all 0.2s ease',
                   boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
+                  outline: 'none',
                 }}
               >
                 <Plus size={18} />

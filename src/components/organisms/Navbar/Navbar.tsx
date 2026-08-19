@@ -79,14 +79,20 @@ export default function Navbar() {
                     fontSize: '0.85rem',
                   }}
                 >
-                  <Avatar name={currentUser.name} size="sm" />
-                  <span>{currentUser.name.split(' ')[0]}</span>
+                  <Avatar name={currentUser.name || 'U'} size="sm" />
+                  <span>{(currentUser.name || 'Usuario').split(' ')[0]}</span>
                 </Button>
-                <Button variant="secondary" size="sm" onClick={logout} style={{ padding: '6px 12px', height: '36px' }} title="Cerrar Sesión">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => { logout(); }}
+                  style={{ padding: '6px 12px', height: '36px' }}
+                  title="Cerrar Sesión"
+                >
                   <LogOut size={16} />
                 </Button>
               </>
-            ) : mounted ? (
+            ) : (
               <>
                 <Button href="/login" variant="outline" size="sm">
                   Iniciar Sesión
@@ -95,8 +101,6 @@ export default function Navbar() {
                   Registrarse
                 </Button>
               </>
-            ) : (
-              <div style={{ width: '120px', height: '36px' }} />
             )}
           </div>
         </div>
