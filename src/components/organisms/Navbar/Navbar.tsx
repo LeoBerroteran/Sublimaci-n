@@ -12,6 +12,7 @@ import { Menu, X, LogOut } from 'lucide-react';
 
 export default function Navbar() {
   const pathname = usePathname();
+
   const { currentUser, isLoggedIn, isAdmin, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -147,7 +148,7 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile Full-Width Clean Dropdown Menu (No dark backdrop, pure solid clean design) */}
+      {/* Mobile Full-Width Clean Dropdown Menu */}
       {mobileMenuOpen && (
         <div className="mobile-dropdown-menu">
           <div className="mobile-dropdown-content">
@@ -173,16 +174,50 @@ export default function Navbar() {
               >
                 Preguntas Frecuentes (FAQ)
               </Link>
-              {mounted && isAdmin && (
-                <Link
-                  href="/admin"
-                  onClick={closeMobileMenu}
-                  className={`mobile-nav-link ${isLinkActive('/admin') ? 'active' : ''}`}
-                >
-                  Panel de Administración
-                </Link>
-              )}
             </div>
+
+            {/* ADMIN SECTIONS INSIDE MOBILE MENU */}
+            {mounted && isAdmin && (
+              <div style={{ marginTop: '8px', paddingTop: '10px', borderTop: '1px solid var(--neutral-dark)' }}>
+                <div style={{ fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-light)', fontWeight: 700, padding: '0 4px 8px', textAlign: 'center' }}>
+                  Panel de Administración
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  <Link
+                    href="/admin?tab=dashboard"
+                    onClick={closeMobileMenu}
+                    className="mobile-nav-link"
+                    style={{ fontSize: '0.9rem', padding: '10px 8px', gap: '6px' }}
+                  >
+                    📊 Dashboard
+                  </Link>
+                  <Link
+                    href="/admin?tab=products"
+                    onClick={closeMobileMenu}
+                    className="mobile-nav-link"
+                    style={{ fontSize: '0.9rem', padding: '10px 8px', gap: '6px' }}
+                  >
+                    📦 Productos
+                  </Link>
+                  <Link
+                    href="/admin?tab=users"
+                    onClick={closeMobileMenu}
+                    className="mobile-nav-link"
+                    style={{ fontSize: '0.9rem', padding: '10px 8px', gap: '6px' }}
+                  >
+                    👥 Usuarios
+                  </Link>
+                  <Link
+                    href="/admin?tab=settings"
+                    onClick={closeMobileMenu}
+                    className="mobile-nav-link"
+                    style={{ fontSize: '0.9rem', padding: '10px 8px', gap: '6px' }}
+                  >
+                    ⚙️ Configuración
+                  </Link>
+                </div>
+              </div>
+            )}
 
             <div className="mobile-dropdown-divider" />
 

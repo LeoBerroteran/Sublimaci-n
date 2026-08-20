@@ -80,6 +80,14 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  icons: {
+    icon: [
+      { url: '/img/logo.png', sizes: '32x32', type: 'image/png' },
+      { url: '/img/logo.png', sizes: '192x192', type: 'image/png' },
+    ],
+    shortcut: '/img/logo.png',
+    apple: '/img/logo.png',
+  },
   alternates: {
     canonical: SITE_URL,
   },
@@ -110,6 +118,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es">
       <head>
+        <link rel="icon" type="image/png" href="/img/logo.png" />
+        <link rel="shortcut icon" type="image/png" href="/img/logo.png" />
+        <link rel="apple-touch-icon" href="/img/logo.png" />
         <link
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"

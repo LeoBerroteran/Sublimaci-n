@@ -217,7 +217,8 @@ export default function ProductTable() {
         </Button>
       </div>
 
-      <div className="admin-table-wrapper">
+      {/* DESKTOP TABLE VIEW */}
+      <div className="admin-table-wrapper desktop-admin-table">
         <table className="admin-table">
           <thead>
             <tr style={{ borderBottom: '2px solid var(--neutral)', textTransform: 'uppercase', fontSize: '0.85rem', color: 'var(--text-light)' }}>
@@ -287,10 +288,75 @@ export default function ProductTable() {
         </table>
       </div>
 
+      {/* MOBILE PRODUCT CARDS VIEW */}
+      <div className="mobile-admin-cards">
+        {loading && productList.length === 0 ? (
+          <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-light)' }}>
+            Cargando catálogo desde Supabase...
+          </div>
+        ) : productList.length === 0 ? (
+          <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-light)' }}>
+            No hay productos registrados en el catálogo.
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {productList.map((product) => (
+              <div
+                key={product.id}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                  padding: '16px',
+                  backgroundColor: 'var(--neutral-light)',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--neutral-dark)',
+                }}
+              >
+                <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
+                  <img
+                    src={product.image || '/img/logo.png'}
+                    alt={product.name}
+                    style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--neutral-dark)', flexShrink: 0 }}
+                  />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                      <span style={{ textTransform: 'capitalize', fontSize: '0.78rem', color: 'var(--primary)', fontWeight: 700 }}>
+                        {product.category}
+                      </span>
+                      {product.badge && (
+                        <Badge type={String(product.badge).toLowerCase() === 'popular' ? 'popular' : 'nuevo'}>
+                          {product.badge}
+                        </Badge>
+                      )}
+                    </div>
+                    <div style={{ fontWeight: 700, fontSize: '0.98rem', color: 'var(--dark)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {product.name}
+                    </div>
+                    <div style={{ marginTop: '4px' }}>
+                      <PriceTag priceUSD={product.price} />
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px', width: '100%', marginTop: '4px' }}>
+                  <Button variant="secondary" size="sm" onClick={() => handleOpenEdit(product)} fullWidth style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                    <Edit2 size={14} /> Editar
+                  </Button>
+                  <Button variant="danger" size="sm" onClick={() => handleDelete(product.id, product.name)} style={{ padding: '8px 16px' }}>
+                    <Trash2 size={14} />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* ADD / EDIT PRODUCT MODAL */}
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '12px 0', maxHeight: '80vh', overflowY: 'auto' }}>
-          <h3 style={{ margin: 0, color: 'var(--dark)', fontSize: '1.4rem' }}>
+        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <h3 style={{ margin: 0, color: 'var(--dark)', fontSize: '1.35rem', fontWeight: 700 }}>
             {editingProduct ? `Editar Producto: ${editingProduct.name}` : 'Agregar Nuevo Producto'}
           </h3>
 
@@ -304,7 +370,7 @@ export default function ProductTable() {
             disabled={saving}
           />
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="admin-form-row-2col">
             <div>
               <label htmlFor="cat-select" style={{ display: 'block', fontWeight: 600, marginBottom: '6px', fontSize: '0.9rem', color: 'var(--dark)' }}>
                 Categoría:
@@ -360,8 +426,8 @@ export default function ProductTable() {
             <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px', fontSize: '0.9rem', color: 'var(--dark)' }}>
               Imagen del Producto:
             </label>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <div style={{ flex: 1 }}>
+            <div className="admin-image-upload-row">
+              <div style={{ flex: 1, minWidth: '200px' }}>
                 <input
                   type="text"
                   value={image}
@@ -393,6 +459,7 @@ export default function ProductTable() {
                   alignItems: 'center',
                   gap: '6px',
                   whiteSpace: 'nowrap',
+                  justifyContent: 'center',
                 }}
               >
                 <Upload size={16} /> Subir archivo
@@ -439,7 +506,7 @@ export default function ProductTable() {
             disabled={saving}
           />
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="admin-form-row-2col">
             <FormField
               label="Materiales"
               type="text"

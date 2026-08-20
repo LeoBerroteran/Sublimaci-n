@@ -106,7 +106,8 @@ export default function UserTable() {
         </Button>
       </div>
       
-      <div className="admin-table-wrapper">
+      {/* DESKTOP USERS TABLE */}
+      <div className="admin-table-wrapper desktop-admin-table">
         <table className="admin-table">
           <thead>
             <tr style={{ borderBottom: '2px solid var(--neutral)', textTransform: 'uppercase', fontSize: '0.85rem', color: 'var(--text-light)' }}>
@@ -180,11 +181,84 @@ export default function UserTable() {
         </table>
       </div>
 
+      {/* MOBILE USERS CARDS */}
+      <div className="mobile-admin-cards">
+        {loading && users.length === 0 ? (
+          <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-light)' }}>
+            Cargando usuarios desde Supabase...
+          </div>
+        ) : users.length === 0 ? (
+          <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-light)' }}>
+            No se encontraron usuarios registrados.
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {users.map((u) => {
+              const uEmail = u.email || u.mail || '';
+              const uId = u.id || uEmail;
+              return (
+                <div
+                  key={uId}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px',
+                    padding: '16px',
+                    backgroundColor: 'var(--neutral-light)',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--neutral-dark)',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {u.role === 'admin' ? <ShieldCheck size={18} style={{ color: 'var(--primary)' }} /> : <UserCheck size={18} style={{ color: 'var(--text-lighter)' }} />}
+                        {u.name} {u.last_name ? u.last_name : ''}
+                      </div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-light)', marginTop: '2px' }}>
+                        {uEmail}
+                      </div>
+                    </div>
+                    <span
+                      style={{
+                        padding: '3px 10px',
+                        borderRadius: '16px',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        backgroundColor: u.role === 'admin' ? 'var(--primary)' : 'var(--neutral-dark)',
+                        color: u.role === 'admin' ? '#ffffff' : 'var(--dark)',
+                      }}
+                    >
+                      {u.role === 'admin' ? 'Admin' : 'Cliente'}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px', width: '100%', marginTop: '4px' }}>
+                    <Button variant="secondary" size="sm" onClick={() => handleOpenEdit(u)} fullWidth style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                      <Edit2 size={14} /> Editar
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      disabled={uEmail === 'admin@subli.com'}
+                      onClick={() => handleDelete(uId, uEmail)}
+                      style={{ padding: '8px 16px' }}
+                    >
+                      <Trash2 size={14} />
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
       {/* EDIT USER MODAL */}
       <Modal isOpen={!!editingUser} onClose={handleCloseEdit}>
         {editingUser && (
-          <form onSubmit={handleSaveEdit} style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '12px 0' }}>
-            <h3 style={{ margin: 0, color: 'var(--dark)', fontSize: '1.4rem' }}>
+          <form onSubmit={handleSaveEdit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <h3 style={{ margin: 0, color: 'var(--dark)', fontSize: '1.35rem', fontWeight: 700 }}>
               Editar Usuario: {editingUser.name}
             </h3>
 
