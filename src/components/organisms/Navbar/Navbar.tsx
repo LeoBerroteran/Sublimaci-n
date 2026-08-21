@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import Logo from '@/components/atoms/Logo/Logo';
 import CurrencyToggle from '@/components/molecules/CurrencyToggle/CurrencyToggle';
+import ThemeToggle from '@/components/molecules/ThemeToggle/ThemeToggle';
 import Button from '@/components/atoms/Button/Button';
 import Avatar from '@/components/atoms/Avatar/Avatar';
 import { Menu, X, LogOut } from 'lucide-react';
@@ -93,6 +94,7 @@ export default function Navbar() {
 
         {/* Desktop Right Actions */}
         <div className="desktop-nav-actions">
+          <ThemeToggle />
           <CurrencyToggle />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -221,9 +223,10 @@ export default function Navbar() {
 
             <div className="mobile-dropdown-divider" />
 
-            {/* Mobile Actions: Currency & Auth */}
+            {/* Mobile Actions: Theme, Currency & Auth */}
             <div className="mobile-dropdown-actions">
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '14px', marginBottom: '14px' }}>
+                <ThemeToggle />
                 <CurrencyToggle />
               </div>
 

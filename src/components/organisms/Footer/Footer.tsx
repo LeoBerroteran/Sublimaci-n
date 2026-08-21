@@ -113,9 +113,8 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="footer-bottom">
+        <div className="footer-bottom" style={{ justifyContent: 'center' }}>
           <p>© 2026 Sublilove. Todos los derechos reservados.</p>
-          <p>Hecho con Next.js 15 & React 19</p>
         </div>
       </div>
     </footer>

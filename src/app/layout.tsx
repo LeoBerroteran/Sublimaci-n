@@ -3,6 +3,7 @@ import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { CurrencyProvider } from '@/context/CurrencyContext';
 import { ToastProvider } from '@/context/ToastContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 import MainLayout from '@/components/templates/MainLayout/MainLayout';
 import ToastContainer from '@/components/organisms/ToastContainer/ToastContainer';
 import JsonLd from '@/components/atoms/JsonLd/JsonLd';
@@ -116,7 +117,7 @@ const organizationSchema = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <head>
         <link rel="icon" type="image/png" href="/img/logo.png" />
         <link rel="shortcut icon" type="image/png" href="/img/logo.png" />
@@ -128,14 +129,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <JsonLd data={organizationSchema} />
       </head>
       <body>
-        <AuthProvider>
-          <CurrencyProvider>
-            <ToastProvider>
-              <MainLayout>{children}</MainLayout>
-              <ToastContainer />
-            </ToastProvider>
-          </CurrencyProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <CurrencyProvider>
+              <ToastProvider>
+                <MainLayout>{children}</MainLayout>
+                <ToastContainer />
+              </ToastProvider>
+            </CurrencyProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

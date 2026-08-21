@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import Button from '@/components/atoms/Button/Button';
 import WhatsAppIcon from '@/components/atoms/WhatsAppIcon/WhatsAppIcon';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
@@ -28,24 +28,23 @@ export default function HeroSection() {
     <section className="hero">
       <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <div className="hero-content">
-          <h1 className="hero-title">
-            Diseños que <span className="text-accent">Inspiran</span>
+          <h1 className="hero-title" style={{ color: '#ffffff' }}>
+            Diseños que Inspiran
           </h1>
           <p className="hero-subtitle">
             Transformamos tus ideas en productos únicos. Sublimación de alta calidad y papelería personalizada para hacer cada momento especial.
           </p>
           <div className="hero-cta">
-            <Button href="/catalogo" variant="primary" size="lg">
+            <Link href="/catalogo" className="hero-btn hero-btn-catalog">
               Ver Catálogo
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
+            </Link>
+            <button
+              type="button"
               onClick={handleContactWhatsApp}
-              style={{ color: '#ffffff', borderColor: '#ffffff', display: 'inline-flex', alignItems: 'center', gap: '10px' }}
+              className="hero-btn hero-btn-whatsapp"
             >
               <WhatsAppIcon size={20} /> Contactar por WhatsApp
-            </Button>
+            </button>
           </div>
         </div>
       </div>
