@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { fetchProducts } from '@/data/products';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://sublilove.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://sublimaci-n-seven.vercel.app';
   const now = new Date();
 
   // Static routes
