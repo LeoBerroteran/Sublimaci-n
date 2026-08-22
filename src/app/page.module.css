@@ -51,11 +51,14 @@
 .ctaTitle {
   font-size: 2.4rem;
   margin-bottom: 16px;
+  color: #ffffff !important;
+  font-weight: 800;
 }
 
 .ctaText {
   font-size: 1.15rem;
-  opacity: 0.9;
+  color: #ffffff;
+  opacity: 0.95;
   max-width: 600px;
   margin: 0 auto 32px;
 }
