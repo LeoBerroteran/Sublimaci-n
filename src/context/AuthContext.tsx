@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserProfile = useCallback(async (authUserId?: string, email?: string): Promise<User | null> => {
+  const fetchUserProfile = useCallback(async (authUserId?: string, email?: string, userMetadata?: any): Promise<User | null> => {
     try {
       const supabase = createClient();
       let query = supabase.from('Users').select('*');
@@ -39,12 +39,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const { data, error } = await query.maybeSingle();
 
+      const metaName = userMetadata?.name || userMetadata?.full_name || '';
+      const metaLastName = userMetadata?.last_name || '';
+
       if (error || !data) {
         if (email) {
+          // If no row in Users table by ID, check if there's a row by mail
+          const { data: mailData } = await supabase.from('Users').select('*').eq('mail', email).maybeSingle();
+          if (mailData && mailData.name) {
+            return {
+              id: mailData.id || authUserId,
+              name: mailData.name,
+              last_name: mailData.last_name || metaLastName || '',
+              email: mailData.mail || email,
+              mail: mailData.mail || email,
+              role: (mailData.role === 'admin' || email === 'admin@subli.com') ? 'admin' : 'cliente',
+              creation_date: mailData.creation_date,
+              update_date: mailData.update_date,
+              deleted: mailData.deleted,
+            };
+          }
+
           const isAdmin = email === 'admin@subli.com';
+          const resolvedName = metaName || (email ? email.split('@')[0] : 'Usuario');
           return {
             id: authUserId,
-            name: email.split('@')[0],
+            name: resolvedName,
+            last_name: metaLastName || '',
             email,
             mail: email,
             role: isAdmin ? 'admin' : 'cliente',
@@ -53,13 +74,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return null;
       }
 
+      const finalName = data.name || metaName || (email ? email.split('@')[0] : 'Usuario');
+      const finalLastName = data.last_name || metaLastName || '';
+
       return {
-        id: data.id,
-        name: data.name || '',
-        last_name: data.last_name || '',
+        id: data.id || authUserId,
+        name: finalName,
+        last_name: finalLastName,
         email: data.mail || email || '',
         mail: data.mail || email || '',
-        role: (data.role === 'admin' ? 'admin' : 'cliente') as 'admin' | 'cliente',
+        role: (data.role === 'admin' || email === 'admin@subli.com') ? 'admin' : 'cliente',
         creation_date: data.creation_date,
         update_date: data.update_date,
         deleted: data.deleted,
@@ -74,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const supabase = createClient();
       const { data: { user }, error } = await supabase.auth.getUser();
       if (user && !error) {
-        const profile = await fetchUserProfile(user.id, user.email);
+        const profile = await fetchUserProfile(user.id, user.email, user.user_metadata);
         setCurrentUser(profile);
       } else {
         setCurrentUser(null);
@@ -95,7 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data: { user } } = await supabase.auth.getUser();
         if (isMounted) {
           if (user) {
-            const profile = await fetchUserProfile(user.id, user.email);
+            const profile = await fetchUserProfile(user.id, user.email, user.user_metadata);
             setCurrentUser(profile);
           } else {
             setCurrentUser(null);
@@ -115,7 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!isMounted) return;
         try {
           if (session?.user) {
-            const profile = await fetchUserProfile(session.user.id, session.user.email);
+            const profile = await fetchUserProfile(session.user.id, session.user.email, session.user.user_metadata);
             setCurrentUser(profile);
           } else {
             setCurrentUser(null);
@@ -155,7 +179,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.user) {
-        const profile = await fetchUserProfile(data.user.id, data.user.email);
+        const profile = await fetchUserProfile(data.user.id, data.user.email, data.user.user_metadata);
         setCurrentUser(profile);
       }
 
@@ -213,7 +237,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           deleted: false,
         }, { onConflict: 'id' }).select();
 
-        const profile = await fetchUserProfile(data.user.id, data.user.email);
+        const profile = await fetchUserProfile(data.user.id, data.user.email, data.user.user_metadata);
         setCurrentUser(profile);
       }
 
@@ -239,7 +263,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         last_name: u.last_name || '',
         email: u.mail || '',
         mail: u.mail || '',
-        role: (u.role === 'admin' ? 'admin' : 'cliente') as 'admin' | 'cliente',
+        role: u.role || 'cliente',
         creation_date: u.creation_date,
         update_date: u.update_date,
         deleted: u.deleted,
@@ -255,10 +279,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const dbUpdates: any = {
         update_date: new Date().toISOString(),
       };
-      if (updates.name !== undefined) dbUpdates.name = updates.name;
-      if (updates.last_name !== undefined) dbUpdates.last_name = updates.last_name;
+      if (updates.name !== undefined) dbUpdates.name = updates.name.trim();
+      if (updates.last_name !== undefined) dbUpdates.last_name = updates.last_name.trim();
+      if (updates.email !== undefined) dbUpdates.mail = updates.email.trim();
       if (updates.role !== undefined) dbUpdates.role = updates.role;
-      if (updates.email !== undefined) dbUpdates.mail = updates.email;
 
       let query = supabase.from('Users').update(dbUpdates);
       if (userIdOrEmail.includes('@')) {
@@ -270,12 +294,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await query;
       if (error) return { success: false, message: error.message };
 
-      await refreshUser();
       return { success: true, message: 'Usuario actualizado con éxito' };
     } catch (err: any) {
       return { success: false, message: err.message || 'Error al actualizar usuario' };
     }
-  }, [refreshUser]);
+  }, []);
 
   const deleteUser = useCallback(async (userIdOrEmail: string): Promise<{ success: boolean; message: string }> => {
     try {
@@ -312,7 +335,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (updates.newPassword) {
         authUpdates.password = updates.newPassword;
       }
-      if (updates.name || updates.lastName) {
+      if (updates.name || updates.lastName !== undefined) {
         authUpdates.data = {
           ...(updates.name ? { name: updates.name.trim() } : {}),
           ...(updates.lastName !== undefined ? { last_name: updates.lastName.trim() } : {}),

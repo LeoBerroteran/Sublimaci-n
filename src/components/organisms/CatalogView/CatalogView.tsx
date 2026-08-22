@@ -79,10 +79,20 @@ export default function CatalogView({ initialProducts }: CatalogViewProps) {
 
   const goToPage = (page: number) => {
     const targetPage = Math.max(1, Math.min(page, totalPages));
-    setCurrentPage(targetPage);
-    if (gridTopRef.current) {
-      gridTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (targetPage === currentPage) return;
+
+    if (typeof window !== 'undefined') {
+      if (gridTopRef.current) {
+        const rect = gridTopRef.current.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const targetY = Math.max(0, rect.top + scrollTop - 90);
+        window.scrollTo({ top: targetY, behavior: 'instant' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }
     }
+
+    setCurrentPage(targetPage);
   };
 
   const getPillStyle = (isActive: boolean): React.CSSProperties => ({
@@ -169,9 +179,18 @@ export default function CatalogView({ initialProducts }: CatalogViewProps) {
         </div>
       </div>
 
-      <div ref={gridTopRef} style={{ scrollMarginTop: '90px' }}>
+      <div
+        ref={gridTopRef}
+        style={{
+          scrollMarginTop: '90px',
+          minHeight: '620px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+        }}
+      >
         {paginatedProducts.length > 0 ? (
-          <>
+          <div>
             <ProductGrid products={paginatedProducts} />
 
             {/* Pagination Controls */}
@@ -266,7 +285,7 @@ export default function CatalogView({ initialProducts }: CatalogViewProps) {
                 </span>
               </div>
             )}
-          </>
+          </div>
         ) : (
           <div
             style={{

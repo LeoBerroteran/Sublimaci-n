@@ -49,6 +49,22 @@ export default function Navbar() {
   const isLinkActive = (href: string) =>
     pathname === href || (href !== '/' && pathname.startsWith(href));
 
+  const getFirstName = (user: { name?: string; email?: string; mail?: string } | null) => {
+    if (!user) return 'Usuario';
+    if (user.name && user.name.trim()) {
+      const firstName = user.name.trim().split(/\s+/)[0];
+      return firstName.charAt(0).toUpperCase() + firstName.slice(1);
+    }
+    const email = user.email || user.mail || '';
+    if (email) {
+      const raw = email.split('@')[0];
+      return raw.charAt(0).toUpperCase() + raw.slice(1);
+    }
+    return 'Usuario';
+  };
+
+  const displayName = getFirstName(currentUser);
+
   return (
     <nav className="navbar">
       <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
@@ -113,8 +129,8 @@ export default function Navbar() {
                     fontSize: '0.85rem',
                   }}
                 >
-                  <Avatar name={currentUser.name || 'U'} size="sm" />
-                  <span>{(currentUser.name || 'Usuario').split(' ')[0]}</span>
+                  <Avatar name={displayName} size="sm" />
+                  <span>{displayName}</span>
                 </Button>
                 <Button
                   variant="secondary"
@@ -233,7 +249,7 @@ export default function Navbar() {
               {mounted && isLoggedIn && currentUser ? (
                 <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
                   <Button href="/perfil" variant="outline" size="md" onClick={closeMobileMenu} fullWidth>
-                    Mi Perfil ({(currentUser.name || 'Usuario').split(' ')[0]})
+                    Mi Perfil ({displayName})
                   </Button>
                   <Button variant="secondary" size="md" onClick={() => { logout(); closeMobileMenu(); }}>
                     Salir
