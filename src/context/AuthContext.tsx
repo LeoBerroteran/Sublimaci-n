@@ -284,7 +284,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const supabase = createClient();
-      let query = supabase.from('Users').update({ deleted: true, update_date: new Date().toISOString() });
+      let query = supabase.from('Users').delete();
       if (userIdOrEmail.includes('@')) {
         query = query.eq('mail', userIdOrEmail);
       } else {
@@ -294,7 +294,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await query;
       if (error) return { success: false, message: error.message };
 
-      return { success: true, message: 'Usuario eliminado' };
+      return { success: true, message: 'Usuario eliminado permanentemente de la base de datos' };
     } catch (err: any) {
       return { success: false, message: err.message || 'Error al eliminar usuario' };
     }

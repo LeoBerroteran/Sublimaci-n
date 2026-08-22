@@ -130,7 +130,7 @@ export default function UserTable() {
   };
 
   const handleDelete = async (identifier: string, email: string) => {
-    if (confirm(`¿Estás seguro de eliminar al usuario ${email}?`)) {
+    if (confirm(`¿Estás seguro de eliminar permanentemente al usuario "${email}" de la base de datos?`)) {
       const res = await deleteUser(identifier);
       if (res.success) {
         showToast(res.message, 'success');

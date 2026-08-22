@@ -199,18 +199,18 @@ export default function ProductTable() {
   };
 
   const handleDelete = async (id: string | number, prodName: string) => {
-    if (confirm(`¿Estás seguro de eliminar el producto "${prodName}"?`)) {
+    if (confirm(`¿Estás seguro de eliminar permanentemente el producto "${prodName}" de la base de datos?`)) {
       try {
         const supabase = createClient();
         const { error } = await supabase
           .from('Products')
-          .update({ deleted: true, update_date: new Date().toISOString() })
+          .delete()
           .eq('id', id);
 
         if (error) {
-          showToast(`Error al eliminar: ${error.message}`, 'error');
+          showToast(`Error al eliminar de la base de datos: ${error.message}`, 'error');
         } else {
-          showToast(`Producto "${prodName}" eliminado`, 'info');
+          showToast(`Producto "${prodName}" eliminado permanentemente de la base de datos`, 'info');
           await loadProducts(false);
         }
       } catch (err: any) {
