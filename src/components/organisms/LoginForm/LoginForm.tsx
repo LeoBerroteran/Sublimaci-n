@@ -1,29 +1,39 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import FormField from '@/components/molecules/FormField/FormField';
 import Button from '@/components/atoms/Button/Button';
-import { LogIn } from 'lucide-react';
+import { LogIn, CheckCircle } from 'lucide-react';
 
-export default function LoginForm() {
+function LoginFormContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [infoNotice, setInfoNotice] = useState<string | null>(null);
 
   const { login } = useAuth();
   const { showToast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('registered') === 'true') {
+      setInfoNotice('¡Tu cuenta ha sido creada! Si requieres verificación, revisa tu correo electrónico para confirmarla.');
+    } else if (searchParams.get('confirmed') === 'true') {
+      setInfoNotice('¡Correo confirmado con éxito! Ya puedes iniciar sesión con tus credenciales.');
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting) return;
 
     setSubmitting(true);
-    const res = await login(email, password);
+    const res = await login(email.trim(), password);
     setSubmitting(false);
 
     if (res.success) {
@@ -35,7 +45,27 @@ export default function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
+      {infoNotice && (
+        <div
+          style={{
+            padding: '12px 16px',
+            borderRadius: 'var(--radius-sm)',
+            backgroundColor: 'rgba(76, 175, 80, 0.12)',
+            border: '1px solid var(--success)',
+            color: 'var(--success)',
+            fontSize: '0.9rem',
+            lineHeight: 1.5,
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '8px',
+          }}
+        >
+          <CheckCircle size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
+          <span>{infoNotice}</span>
+        </div>
+      )}
+
       <FormField
         label="Correo Electrónico"
         type="email"
@@ -80,5 +110,13 @@ export default function LoginForm() {
         </Link>
       </div>
     </form>
+  );
+}
+
+export default function LoginForm() {
+  return (
+    <React.Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-light)' }}>Cargando formulario...</div>}>
+      <LoginFormContent />
+    </React.Suspense>
   );
 }

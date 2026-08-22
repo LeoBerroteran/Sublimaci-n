@@ -49,12 +49,12 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   };
 
   return (
-    <div className="product-detail-container" style={{ maxWidth: '1100px', margin: '0 auto' }}>
+    <div className="product-detail-container" style={{ maxWidth: '1100px', margin: '0 auto', width: '100%' }}>
       <Link
         href="/catalogo"
         className="btn btn-outline btn-sm"
         style={{
-          marginBottom: '24px',
+          marginBottom: '20px',
           display: 'inline-flex',
           alignItems: 'center',
           gap: '8px',
@@ -70,7 +70,16 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       <div className="product-detail">
         <div
           className={`product-detail-image cat-${product.category}`}
-          style={{ position: 'relative', width: '100%', minHeight: '380px', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}
+          style={{
+            position: 'relative',
+            width: '100%',
+            aspectRatio: '1/1',
+            minHeight: '260px',
+            maxHeight: '460px',
+            borderRadius: 'var(--radius-lg)',
+            overflow: 'hidden',
+            margin: '0 auto',
+          }}
         >
           <Image
             src={product.image || '/img/logo.png'}
@@ -82,17 +91,30 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           />
         </div>
 
-        <div className="product-detail-info">
+        <div className="product-detail-info" style={{ width: '100%' }}>
           <span className="product-detail-category">{product.category}</span>
-          <h1 style={{ fontSize: '2.4rem', color: 'var(--dark)', margin: '8px 0 16px' }}>{product.name}</h1>
-          <div className="product-detail-price" style={{ marginBottom: '24px' }}>
+          <h1
+            style={{
+              fontSize: 'clamp(1.5rem, 4vw, 2.3rem)',
+              color: 'var(--dark)',
+              margin: '8px 0 16px',
+              lineHeight: 1.2,
+              wordBreak: 'break-word',
+            }}
+          >
+            {product.name}
+          </h1>
+
+          <div className="product-detail-price" style={{ marginBottom: '20px' }}>
             <PriceTag priceUSD={product.price} />
           </div>
 
-          <p className="product-detail-description">{product.description}</p>
+          <p className="product-detail-description" style={{ lineHeight: 1.6, color: 'var(--text)' }}>
+            {product.description}
+          </p>
 
           <div className="product-specs">
-            <h3>Especificaciones</h3>
+            <h3 style={{ margin: '0 0 12px', fontSize: '1.1rem', color: 'var(--dark)' }}>Especificaciones</h3>
             {product.materials && (
               <div className="spec-item">
                 <span className="spec-label">Materiales:</span>
@@ -122,6 +144,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   borderRadius: 'var(--radius-sm)',
                   border: '2px solid var(--neutral-dark)',
                   backgroundColor: 'var(--white)',
+                  color: 'var(--text)',
                   fontSize: '1rem',
                   outline: 'none',
                 }}
@@ -135,7 +158,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             </div>
           )}
 
-          <div style={{ margin: '24px 0', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ margin: '24px 0', display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
             <span style={{ fontWeight: 600, color: 'var(--dark)', fontSize: '1rem' }}>Cantidad:</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <button
@@ -154,7 +177,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   alignItems: 'center',
                   justifyContent: 'center',
                   transition: 'all 0.2s ease',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
+                  boxShadow: '0 2px 6px var(--shadow)',
                   outline: 'none',
                 }}
               >
@@ -163,7 +186,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
               <span
                 style={{
-                  minWidth: '56px',
+                  minWidth: '52px',
                   height: '42px',
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -196,7 +219,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   alignItems: 'center',
                   justifyContent: 'center',
                   transition: 'all 0.2s ease',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
+                  boxShadow: '0 2px 6px var(--shadow)',
                   outline: 'none',
                 }}
               >

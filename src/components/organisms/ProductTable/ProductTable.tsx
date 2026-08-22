@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchProducts } from '@/data/products';
 import { Product } from '@/types';
 import { createClient } from '@/lib/supabase/client';
@@ -10,7 +10,9 @@ import PriceTag from '@/components/atoms/PriceTag/PriceTag';
 import Modal from '@/components/organisms/Modal/Modal';
 import FormField from '@/components/molecules/FormField/FormField';
 import { useToast } from '@/hooks/useToast';
-import { Plus, Edit2, Trash2, RefreshCw, Image as ImageIcon, Upload } from 'lucide-react';
+import { Plus, Edit2, Trash2, RefreshCw, Upload, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+
+const ITEMS_PER_PAGE = 6;
 
 export default function ProductTable() {
   const [productList, setProductList] = useState<Product[]>([]);
@@ -18,12 +20,14 @@ export default function ProductTable() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [saving, setSaving] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const { showToast } = useToast();
 
   // Form states
   const [name, setName] = useState('');
   const [category, setCategory] = useState<'sublimacion' | 'papeleria'>('sublimacion');
-  const [price, setPrice] = useState(0);
+  const [price, setPrice] = useState(10);
   const [description, setDescription] = useState('');
   const [materials, setMaterials] = useState('');
   const [printArea, setPrintArea] = useState('');
@@ -38,7 +42,7 @@ export default function ProductTable() {
       if (showFeedback) {
         showToast('Lista de productos actualizada', 'success');
       }
-    } catch (err: any) {
+    } catch {
       if (showFeedback) {
         showToast('Error al actualizar productos', 'error');
       }
@@ -50,6 +54,31 @@ export default function ProductTable() {
   useEffect(() => {
     loadProducts(false);
   }, [loadProducts]);
+
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+  };
+
+  const filteredList = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return productList;
+    return productList.filter((p) =>
+      (p.name || '').toLowerCase().includes(q) ||
+      (p.category || '').toLowerCase().includes(q) ||
+      (p.description || '').toLowerCase().includes(q)
+    );
+  }, [productList, searchQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredList.length / ITEMS_PER_PAGE));
+  const paginatedList = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredList.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredList, currentPage]);
+
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
 
   const handleOpenAdd = () => {
     setEditingProduct(null);
@@ -100,28 +129,24 @@ export default function ProductTable() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!name.trim() || price <= 0) {
-      showToast('Por favor completa el nombre y un precio válido', 'error');
+    if (!name.trim()) {
+      showToast('El nombre del producto es obligatorio', 'warning');
       return;
     }
 
     setSaving(true);
-    const supabase = createClient();
-
     try {
-      const finalImage = image.trim() || (category === 'sublimacion' ? '/img/taza_personalizada.jpg' : '/img/cuaderno_personalizado.jpg');
+      const supabase = createClient();
       const defaultIcon = category === 'sublimacion' ? '☕' : '📓';
+      const finalImage = image.trim() || '/img/logo.png';
 
       if (editingProduct) {
-        // Edit existing product in Supabase
         const { error } = await supabase
           .from('Products')
           .update({
-            name,
+            name: name.trim(),
             category,
-            base_price: Number(price),
-            discount_price: Number(price),
+            price: Number(price),
             description,
             materials,
             print_area: printArea,
@@ -134,19 +159,17 @@ export default function ProductTable() {
         if (error) {
           showToast(`Error al actualizar: ${error.message}`, 'error');
         } else {
-          showToast(`Producto "${name}" actualizado con éxito`, 'success');
+          showToast(`Producto "${name}" actualizado`, 'success');
           handleCloseModal();
           await loadProducts(false);
         }
       } else {
-        // Add new product in Supabase
         const { error } = await supabase
           .from('Products')
           .insert({
-            name,
+            name: name.trim(),
             category,
-            base_price: Number(price),
-            discount_price: Number(price),
+            price: Number(price),
             description,
             materials,
             sizes: ['Estándar'],
@@ -198,9 +221,11 @@ export default function ProductTable() {
 
   return (
     <div className="admin-card">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-          <h2 style={{ fontSize: 'clamp(1.25rem, 3.5vw, 1.6rem)', margin: 0, color: 'var(--dark)' }}>Catálogo de Productos ({productList.length})</h2>
+          <h2 style={{ fontSize: 'clamp(1.25rem, 3.5vw, 1.6rem)', margin: 0, color: 'var(--dark)' }}>
+            Catálogo de Productos ({productList.length})
+          </h2>
           <Button
             variant="outline"
             size="sm"
@@ -215,6 +240,38 @@ export default function ProductTable() {
         <Button variant="primary" onClick={handleOpenAdd} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
           <Plus size={18} /> Agregar Producto
         </Button>
+      </div>
+
+      {/* SEARCH BAR */}
+      <div style={{ position: 'relative', marginBottom: '20px', maxWidth: '440px' }}>
+        <Search
+          size={18}
+          style={{
+            position: 'absolute',
+            left: '14px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: 'var(--primary)',
+            pointerEvents: 'none',
+          }}
+        />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          placeholder="Buscar producto por nombre o categoría..."
+          style={{
+            width: '100%',
+            padding: '10px 16px 10px 42px',
+            borderRadius: 'var(--radius-sm)',
+            border: '2px solid var(--neutral-dark)',
+            backgroundColor: 'var(--white)',
+            color: 'var(--text)',
+            fontSize: '0.92rem',
+            outline: 'none',
+            boxSizing: 'border-box',
+          }}
+        />
       </div>
 
       {/* DESKTOP TABLE VIEW */}
@@ -238,16 +295,16 @@ export default function ProductTable() {
                   Cargando catálogo desde Supabase...
                 </td>
               </tr>
-            ) : productList.length === 0 ? (
+            ) : paginatedList.length === 0 ? (
               <tr>
                 <td colSpan={7} style={{ padding: '24px', textAlign: 'center', color: 'var(--text-light)' }}>
-                  No hay productos registrados en el catálogo.
+                  {searchQuery ? 'No se encontraron productos coincidentes.' : 'No hay productos registrados.'}
                 </td>
               </tr>
             ) : (
-              productList.map((product, index) => (
+              paginatedList.map((product, index) => (
                 <tr key={product.id} style={{ borderBottom: '1px solid var(--neutral)' }}>
-                  <td style={{ padding: '12px', color: 'var(--text-light)' }}>{index + 1}</td>
+                  <td style={{ padding: '12px', color: 'var(--text-light)' }}>{(currentPage - 1) * ITEMS_PER_PAGE + index + 1}</td>
                   <td style={{ padding: '12px' }}>
                     <img
                       src={product.image || '/img/logo.png'}
@@ -294,13 +351,13 @@ export default function ProductTable() {
           <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-light)' }}>
             Cargando catálogo desde Supabase...
           </div>
-        ) : productList.length === 0 ? (
+        ) : paginatedList.length === 0 ? (
           <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-light)' }}>
-            No hay productos registrados en el catálogo.
+            {searchQuery ? 'No se encontraron productos coincidentes.' : 'No hay productos registrados.'}
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {productList.map((product) => (
+            {paginatedList.map((product) => (
               <div
                 key={product.id}
                 style={{
@@ -352,6 +409,80 @@ export default function ProductTable() {
           </div>
         )}
       </div>
+
+      {/* PAGINATION CONTROLS */}
+      {totalPages > 1 && (
+        <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <span style={{ fontSize: '0.88rem', color: 'var(--text-light)' }}>
+            Mostrando {Math.min(filteredList.length, (currentPage - 1) * ITEMS_PER_PAGE + 1)} - {Math.min(filteredList.length, currentPage * ITEMS_PER_PAGE)} de {filteredList.length} productos
+          </span>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <button
+              type="button"
+              disabled={currentPage === 1}
+              onClick={() => goToPage(currentPage - 1)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '6px 12px',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--neutral-dark)',
+                backgroundColor: 'var(--white)',
+                color: 'var(--text)',
+                fontSize: '0.85rem',
+                cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                opacity: currentPage === 1 ? 0.5 : 1,
+              }}
+            >
+              <ChevronLeft size={16} /> Anterior
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+              <button
+                key={pageNum}
+                type="button"
+                onClick={() => goToPage(pageNum)}
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: 'var(--radius-sm)',
+                  border: pageNum === currentPage ? '2px solid var(--primary)' : '1px solid var(--neutral-dark)',
+                  backgroundColor: pageNum === currentPage ? 'var(--primary)' : 'var(--white)',
+                  color: pageNum === currentPage ? '#ffffff' : 'var(--text)',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                }}
+              >
+                {pageNum}
+              </button>
+            ))}
+
+            <button
+              type="button"
+              disabled={currentPage === totalPages}
+              onClick={() => goToPage(currentPage + 1)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '6px 12px',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--neutral-dark)',
+                backgroundColor: 'var(--white)',
+                color: 'var(--text)',
+                fontSize: '0.85rem',
+                cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                opacity: currentPage === totalPages ? 0.5 : 1,
+              }}
+            >
+              Siguiente <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ADD / EDIT PRODUCT MODAL */}
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}>

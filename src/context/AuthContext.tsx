@@ -15,7 +15,7 @@ interface AuthContextType {
   getUsers: () => Promise<User[]>;
   updateUser: (userIdOrEmail: string, updates: Partial<User>) => Promise<{ success: boolean; message: string }>;
   deleteUser: (userIdOrEmail: string) => Promise<{ success: boolean; message: string }>;
-  updateProfile: (updates: { name?: string; email?: string; currentPassword?: string; newPassword?: string }) => Promise<{ success: boolean; message: string }>;
+  updateProfile: (updates: { name?: string; lastName?: string; email?: string; currentPassword?: string; newPassword?: string }) => Promise<{ success: boolean; message: string }>;
   refreshUser: () => Promise<void>;
 }
 
@@ -180,14 +180,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const supabase = createClient();
       const cleanEmail = email.trim().toLowerCase();
+      const siteUrl = typeof window !== 'undefined' && window.location.origin
+        ? window.location.origin
+        : (process.env.NEXT_PUBLIC_SITE_URL || 'https://sublilove.com');
+
       const { data, error } = await supabase.auth.signUp({
         email: cleanEmail,
         password,
         options: {
           data: {
-            name,
-            last_name: lastName,
+            name: name.trim(),
+            last_name: lastName.trim(),
           },
+          emailRedirectTo: `${siteUrl}/login?confirmed=true`,
         },
       });
 
@@ -198,8 +203,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data.user) {
         await supabase.from('Users').upsert({
           id: data.user.id,
-          name,
-          last_name: lastName,
+          name: name.trim(),
+          last_name: lastName.trim(),
           mail: cleanEmail,
           password: 'managed_by_auth',
           role: 'cliente',
@@ -212,7 +217,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setCurrentUser(profile);
       }
 
-      return { success: true, message: 'Cuenta creada exitosamente' };
+      return { success: true, message: 'Cuenta creada exitosamente. Si la confirmación está activa, por favor revisa tu correo electrónico.' };
     } catch (err: any) {
       return { success: false, message: err.message || 'Error al registrar usuario' };
     }
@@ -295,7 +300,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const updateProfile = useCallback(async (updates: { name?: string; email?: string; currentPassword?: string; newPassword?: string }): Promise<{ success: boolean; message: string }> => {
+  const updateProfile = useCallback(async (updates: { name?: string; lastName?: string; email?: string; currentPassword?: string; newPassword?: string }): Promise<{ success: boolean; message: string }> => {
     try {
       if (!currentUser) return { success: false, message: 'No hay sesión activa' };
 
@@ -307,16 +312,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (updates.newPassword) {
         authUpdates.password = updates.newPassword;
       }
+      if (updates.name || updates.lastName) {
+        authUpdates.data = {
+          ...(updates.name ? { name: updates.name.trim() } : {}),
+          ...(updates.lastName !== undefined ? { last_name: updates.lastName.trim() } : {}),
+        };
+      }
 
       if (Object.keys(authUpdates).length > 0) {
         const { error: authError } = await supabase.auth.updateUser(authUpdates);
         if (authError) return { success: false, message: authError.message };
       }
 
-      if (updates.name || updates.email) {
+      if (updates.name || updates.lastName !== undefined || updates.email) {
         const dbUpdates: any = { update_date: new Date().toISOString() };
-        if (updates.name) dbUpdates.name = updates.name;
-        if (updates.email) dbUpdates.mail = updates.email;
+        if (updates.name) dbUpdates.name = updates.name.trim();
+        if (updates.lastName !== undefined) dbUpdates.last_name = updates.lastName.trim();
+        if (updates.email) dbUpdates.mail = updates.email.trim();
 
         if (currentUser.id) {
           await supabase.from('Users').update(dbUpdates).eq('id', currentUser.id);

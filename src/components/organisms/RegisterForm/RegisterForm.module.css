@@ -1,31 +1,69 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1rem;
+  width: 100%;
 }
 
-.criteria {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.row2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+}
+
+.errorFeedback {
+  color: var(--error);
+  font-size: 0.8rem;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.criteriaList {
+  margin-top: 8px;
   font-size: 0.8rem;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 4px;
 }
 
-.met {
-  color: #4caf50;
+.criteriaItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
 }
 
-.met::before {
-  content: '✓ ';
+.criteriaMet {
+  color: var(--success);
 }
 
-.unmet {
+.criteriaUnmet {
+  color: var(--error);
+}
+
+.loginPrompt {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 0.9rem;
   color: var(--text-light);
 }
 
-.unmet::before {
-  content: '○ ';
+.loginLink {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.loginLink:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 520px) {
+  .row2col {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
 }

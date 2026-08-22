@@ -101,7 +101,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   return (
     <>
       <JsonLd data={productSchema} />
-      <div className="container" style={{ padding: '40px 24px 80px' }}>
+      <div className="container" style={{ padding: '30px 16px 60px', width: '100%', boxSizing: 'border-box' }}>
         <ProductDetail product={product} />
       </div>
     </>

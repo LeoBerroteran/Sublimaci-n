@@ -1,17 +1,129 @@
-.layout {
+.container {
+  min-height: calc(100vh - 150px);
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, var(--bg) 0%, var(--primary-light) 100%);
-  padding: 2rem;
+  padding: 40px 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .card {
-  background: white;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  padding: 2.5rem;
   width: 100%;
-  max-width: 480px;
+  max-width: 960px;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  background-color: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 40px var(--shadow-lg);
+  overflow: hidden;
+  transition: background-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.formColumn {
+  padding: 44px 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.title {
+  font-size: 2rem;
+  color: var(--dark);
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.subtitle {
+  color: var(--text-light);
+  font-size: 0.98rem;
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.bannerColumn {
+  position: relative;
+  min-height: 380px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 40px;
+  color: #ffffff;
+  box-sizing: border-box;
+}
+
+.bannerContent {
+  position: relative;
+  z-index: 2;
+}
+
+.bannerBadge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+.bannerTitle {
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 12px;
+  color: #ffffff;
+}
+
+.bannerText {
+  font-size: 0.95rem;
+  opacity: 0.92;
+  line-height: 1.6;
+  margin: 0;
+  color: #ffffff;
+}
+
+/* Mobile & Tablet Responsive */
+@media (max-width: 820px) {
+  .container {
+    padding: 24px 14px;
+  }
+
+  .card {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+  }
+
+  .formColumn {
+    padding: 32px 22px;
+  }
+
+  .title {
+    font-size: 1.65rem;
+  }
+
+  .bannerColumn {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 16px 10px;
+  }
+
+  .formColumn {
+    padding: 24px 16px;
+  }
+
+  .title {
+    font-size: 1.45rem;
+  }
 }

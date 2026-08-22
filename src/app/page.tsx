@@ -6,6 +6,9 @@ import { fetchProducts } from '@/data/products';
 import Link from 'next/link';
 import styles from './page.module.css';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function HomePage() {
   const allProducts = await fetchProducts();
   const featured = allProducts.filter((p) => p.featured);
