@@ -32,7 +32,7 @@ export default function FormField({
   const errorMessage = typeof error === 'string' ? error : error ? 'Campo requerido' : undefined;
 
   return (
-    <div className={styles.field}>
+    <div className={styles.formField || styles.field}>
       <label htmlFor={id} className={styles.label}>
         {label} {required && <span className={styles.required}>*</span>}
       </label>
@@ -47,7 +47,6 @@ export default function FormField({
         disabled={disabled}
         required={required}
       />
-      {errorMessage && <div className={styles.error}>{errorMessage}</div>}
       {children}
     </div>
   );
