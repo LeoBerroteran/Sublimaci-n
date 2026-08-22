@@ -11,7 +11,7 @@ import WhatsAppIcon from '@/components/atoms/WhatsAppIcon/WhatsAppIcon';
 import { getWhatsAppUrl } from '@/lib/whatsapp';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
-import { ArrowLeft, Plus, Minus } from 'lucide-react';
+import { ArrowLeft, Plus, Minus, ChevronDown } from 'lucide-react';
 
 interface ProductDetailProps {
   product: Product;
@@ -130,31 +130,82 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           </div>
 
           {product.sizes && product.sizes.length > 0 && (
-            <div style={{ marginBottom: '20px' }}>
-              <label htmlFor="size-select" style={{ display: 'block', fontWeight: 600, marginBottom: '8px', color: 'var(--dark)' }}>
-                Tamaño:
-              </label>
-              <select
-                id="size-select"
-                value={selectedSize}
-                onChange={(e) => setSelectedSize(e.target.value)}
+            <div style={{ marginBottom: '22px' }}>
+              <label
+                htmlFor="size-select"
                 style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '2px solid var(--neutral-dark)',
-                  backgroundColor: 'var(--white)',
-                  color: 'var(--text)',
-                  fontSize: '1rem',
-                  outline: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontWeight: 700,
+                  fontSize: '0.95rem',
+                  marginBottom: '8px',
+                  color: 'var(--dark)',
                 }}
               >
-                {product.sizes.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
+                <span>Tamaño:</span>
+              </label>
+              <div style={{ position: 'relative', width: '100%', maxWidth: '420px' }}>
+                <select
+                  id="size-select"
+                  value={selectedSize}
+                  onChange={(e) => setSelectedSize(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '13px 44px 13px 18px',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '2px solid var(--neutral-dark)',
+                    backgroundColor: 'var(--white)',
+                    color: 'var(--text)',
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                    outline: 'none',
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    MozAppearance: 'none',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px var(--shadow)',
+                    transition: 'all 0.25s ease',
+                    boxSizing: 'border-box',
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--primary)';
+                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(169, 115, 130, 0.25)';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--neutral-dark)';
+                    e.currentTarget.style.boxShadow = '0 2px 8px var(--shadow)';
+                  }}
+                >
+                  {product.sizes.map((s) => (
+                    <option
+                      key={s}
+                      value={s}
+                      style={{
+                        backgroundColor: 'var(--white)',
+                        color: 'var(--text)',
+                        padding: '10px',
+                      }}
+                    >
+                      {s}
+                    </option>
+                  ))}
+                </select>
+                <div
+                  style={{
+                    position: 'absolute',
+                    right: '16px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    pointerEvents: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    color: 'var(--primary)',
+                  }}
+                >
+                  <ChevronDown size={20} />
+                </div>
+              </div>
             </div>
           )}
 
