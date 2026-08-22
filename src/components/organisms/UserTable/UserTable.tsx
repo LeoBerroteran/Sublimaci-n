@@ -7,6 +7,7 @@ import Button from '@/components/atoms/Button/Button';
 import Modal from '@/components/organisms/Modal/Modal';
 import FormField from '@/components/molecules/FormField/FormField';
 import { User } from '@/types';
+import { validateName, validateLastName, validateEmail } from '@/lib/validators';
 import { Edit2, Trash2, ShieldCheck, UserCheck, RefreshCw, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 6;
@@ -88,6 +89,26 @@ export default function UserTable() {
   const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingUser) return;
+
+    const nameValidation = validateName(editName);
+    if (!nameValidation.valid) {
+      showToast(nameValidation.message, 'error');
+      return;
+    }
+
+    if (editLastName.trim()) {
+      const lastNameValidation = validateLastName(editLastName);
+      if (!lastNameValidation.valid) {
+        showToast(lastNameValidation.message, 'error');
+        return;
+      }
+    }
+
+    const emailValidation = validateEmail(editEmail);
+    if (!emailValidation.valid) {
+      showToast(emailValidation.message, 'error');
+      return;
+    }
 
     setSaving(true);
     const identifier = editingUser.id || editingUser.email || editingUser.mail || '';

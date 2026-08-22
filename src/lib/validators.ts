@@ -1,115 +1,96 @@
-// Validation patterns and advanced sanity checks for human names, email, and password
-
-export interface ValidationResult {
-  valid: boolean;
-  message: string;
-}
+// Validation patterns and anti-gibberish logic for Sublilove
 
 /**
- * Validates whether a string is a plausible human name or last name.
- * Detects keyboard smashing, random gibberish, non-alphabetic characters,
- * impossible consonant chains, and excessive character repetition.
+ * Checks if a string looks like random keyboard mashing or gibberish (e.g. "fsuhfdskjdskfhdskjfhdskmncx...")
  */
-export function validateHumanName(value: string, fieldLabel: 'nombre' | 'apellido'): ValidationResult {
-  const trimmed = value.trim();
+export function isLikelyGibberish(text: string): { isGibberish: boolean; reason: string } {
+  const clean = text.trim();
 
-  // 1. Mandatory presence check
-  if (!trimmed) {
-    return { valid: false, message: `El ${fieldLabel} es obligatorio` };
+  if (clean.length < 2) {
+    return { isGibberish: true, reason: 'Debe tener al menos 2 caracteres' };
   }
 
-  // 2. Length range check
-  if (trimmed.length < 2) {
-    return { valid: false, message: `El ${fieldLabel} debe tener al menos 2 letras` };
-  }
-  if (trimmed.length > 35) {
-    return { valid: false, message: `El ${fieldLabel} no puede tener más de 35 caracteres` };
+  if (clean.length > 30) {
+    return { isGibberish: true, reason: 'No puede exceder los 30 caracteres' };
   }
 
-  // 3. Strict alphabetic character check (letters, accents, ñ, ü, single spaces)
-  const lettersOnlyRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/;
-  if (!lettersOnlyRegex.test(trimmed)) {
-    return {
-      valid: false,
-      message: `El ${fieldLabel} solo puede contener letras (sin números ni caracteres especiales)`,
-    };
+  // Only allowed characters (letters, accents, ñ, ü, and single spaces)
+  if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/.test(clean)) {
+    return { isGibberish: true, reason: 'Solo se permiten letras y espacios (sin números ni símbolos)' };
   }
 
-  // 4. Excessive consecutive repeated characters (e.g. "aaaa", "zzzz", "ffff")
-  if (/(.)\1{2,}/i.test(trimmed)) {
-    return {
-      valid: false,
-      message: `El ${fieldLabel} contiene demasiadas letras idénticas seguidas`,
-    };
-  }
+  const words = clean.split(/\s+/).filter(Boolean);
 
-  // 5. Inspect individual words (e.g. for compound names like "María José" or "De La Cruz")
-  const words = trimmed.split(/\s+/);
   for (const word of words) {
-    // Single letter words are only valid if standard prepositions/connectors
-    if (word.length === 1 && !/^[ydeaoYDEAO]$/i.test(word)) {
-      return {
-        valid: false,
-        message: `La parte "${word}" en el ${fieldLabel} es demasiado corta`,
-      };
+    const lowerWord = word.toLowerCase();
+
+    if (lowerWord.length < 2) {
+      return { isGibberish: true, reason: 'Cada palabra o nombre debe tener al menos 2 letras' };
+    }
+
+    if (lowerWord.length > 18) {
+      return { isGibberish: true, reason: 'Ingresa un nombre real (palabra demasiado larga)' };
+    }
+
+    // Repeated characters: 3 or more identical characters in a row (e.g. aaa, fff)
+    if (/(.)\1{2,}/i.test(lowerWord)) {
+      return { isGibberish: true, reason: 'No se permiten caracteres repetidos consecutivamente' };
     }
 
     // Must contain at least one vowel
-    const hasVowels = /[aeiouáéíóúüAEIOUÁÉÍÓÚÜ]/.test(word);
-    if (!hasVowels && word.length > 1) {
-      return {
-        valid: false,
-        message: `El ${fieldLabel} "${word}" no es válido (debe contener vocales)`,
-      };
+    const vowels = lowerWord.match(/[aeiouáéíóúüy]/g);
+    if (!vowels || vowels.length === 0) {
+      return { isGibberish: true, reason: 'Debe contener vocales válidas' };
     }
 
-    // 4 or more consecutive consonants is a clear sign of keyboard mash (e.g. "fskjd", "mncx", "dfgh")
-    const tooManyConsonants = /[bcdfghjklmnñpqrstvwxyzBCDFGHJKLMNÑPQRSTVWXYZ]{4,}/i.test(word);
-    if (tooManyConsonants) {
-      return {
-        valid: false,
-        message: `El ${fieldLabel} "${word}" no parece un nombre real (demasiadas consonantes seguidas)`,
-      };
+    // Vowel ratio check for words with 4+ letters
+    if (lowerWord.length >= 4 && vowels.length / lowerWord.length < 0.20) {
+      return { isGibberish: true, reason: 'Ingresa un nombre válido (demasiadas consonantes seguidas)' };
     }
 
-    // A single word in a name cannot be absurdly long
-    if (word.length > 18) {
-      return {
-        valid: false,
-        message: `El ${fieldLabel} contiene una palabra anormalmente larga`,
-      };
+    // 4 or more consecutive consonants (e.g. dskj, fhdsk, rtxw)
+    if (/[bcdfghjklmnñpqrstvwxz]{4,}/i.test(lowerWord)) {
+      return { isGibberish: true, reason: 'Ingresa un nombre válido (combinación de letras no válida)' };
+    }
+
+    // 4 or more consecutive vowels (e.g. aeiou)
+    if (/[aeiouáéíóúü]{4,}/i.test(lowerWord)) {
+      return { isGibberish: true, reason: 'Ingresa un nombre válido (demasiadas vocales seguidas)' };
+    }
+
+    // Common keyboard mash sequences
+    const mashSequences = [
+      'asdf', 'sdfg', 'dfgh', 'fghj', 'ghjk', 'hjkl',
+      'qwer', 'wert', 'erty', 'rtyu', 'tyui', 'yuio', 'uiop',
+      'zxcv', 'xcvb', 'cvbn', 'vbnm',
+      'qazw', 'wsxe', 'edcr', 'rfvt', 'tgbz',
+      'lkjh', 'kjhg', 'jhgf', 'hgfd', 'gfds', 'fdsa',
+      'poiuy', 'oiuyt', 'iuytr', 'uytre', 'ytrew', 'trewq',
+    ];
+    for (const seq of mashSequences) {
+      if (lowerWord.includes(seq)) {
+        return { isGibberish: true, reason: 'Ingresa un nombre real (no uses secuencias del teclado)' };
+      }
     }
   }
 
-  return { valid: true, message: '' };
-}
-
-export function validateName(name: string): ValidationResult {
-  return validateHumanName(name, 'nombre');
-}
-
-export function validateLastName(lastName: string): ValidationResult {
-  const trimmed = lastName ? lastName.trim() : '';
-  if (!trimmed) {
-    return { valid: false, message: 'El apellido es obligatorio' };
-  }
-  return validateHumanName(trimmed, 'apellido');
-}
-
-export function validateEmail(email: string): ValidationResult {
-  const trimmed = email ? email.trim() : '';
-  if (!trimmed) {
-    return { valid: false, message: 'El correo electrónico es obligatorio' };
-  }
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  if (!emailRegex.test(trimmed)) {
-    return { valid: false, message: 'Formato de correo electrónico inválido' };
-  }
-  return { valid: true, message: '' };
+  return { isGibberish: false, reason: '' };
 }
 
 export const validations = {
+  name: {
+    message: 'Ingresa un nombre válido (solo letras, 2 a 30 caracteres)',
+  },
+  lastName: {
+    message: 'Ingresa un apellido válido (solo letras, 2 a 30 caracteres)',
+  },
+  email: {
+    pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+    message: 'Formato de correo electrónico inválido',
+  },
   password: {
+    pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#+\-_.])[A-Za-z\d@$!%*?&#+\-_.]{8,}$/,
+    message: 'Mínimo 8 caracteres con mayúscula, minúscula, número y carácter especial',
     criteria: [
       { pattern: /.{8,}/, label: 'Mínimo 8 caracteres' },
       { pattern: /[A-Z]/, label: 'Una letra mayúscula' },
@@ -120,18 +101,40 @@ export const validations = {
   },
 };
 
-export function validatePassword(password: string): ValidationResult {
-  if (!password || password.length < 8) {
-    return { valid: false, message: 'La contraseña debe tener al menos 8 caracteres' };
+export function validateName(name: string): { valid: boolean; message: string } {
+  const trimmed = (name || '').trim();
+  if (!trimmed) {
+    return { valid: false, message: 'El nombre es obligatorio' };
   }
-  const hasUpper = /[A-Z]/.test(password);
-  const hasLower = /[a-z]/.test(password);
-  const hasNumber = /\d/.test(password);
-  const hasSpecial = /[@$!%*?&#+\-_.]/.test(password);
-
-  if (!hasUpper || !hasLower || !hasNumber || !hasSpecial) {
-    return { valid: false, message: 'La contraseña debe incluir mayúscula, minúscula, número y carácter especial' };
+  const check = isLikelyGibberish(trimmed);
+  if (check.isGibberish) {
+    return { valid: false, message: check.reason };
   }
-
   return { valid: true, message: '' };
+}
+
+export function validateLastName(lastName: string): { valid: boolean; message: string } {
+  const trimmed = (lastName || '').trim();
+  if (!trimmed) {
+    return { valid: false, message: 'El apellido es obligatorio' };
+  }
+  const check = isLikelyGibberish(trimmed);
+  if (check.isGibberish) {
+    return { valid: false, message: check.reason };
+  }
+  return { valid: true, message: '' };
+}
+
+export function validateEmail(email: string): { valid: boolean; message: string } {
+  const trimmed = (email || '').trim();
+  if (!trimmed) {
+    return { valid: false, message: 'El correo electrónico es obligatorio' };
+  }
+  const valid = validations.email.pattern.test(trimmed);
+  return { valid, message: valid ? '' : validations.email.message };
+}
+
+export function validatePassword(password: string): { valid: boolean; message: string } {
+  const valid = validations.password.pattern.test(password || '');
+  return { valid, message: valid ? '' : validations.password.message };
 }

@@ -180,8 +180,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const supabase = createClient();
       const cleanEmail = email.trim().toLowerCase();
-      const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://sublimaci-n-seven.vercel.app';
-      const siteUrl = rawSiteUrl.replace(/\/+$/, '');
+      const siteUrl = typeof window !== 'undefined' && window.location.origin
+        ? window.location.origin
+        : (process.env.NEXT_PUBLIC_SITE_URL || 'https://sublilove.com');
 
       const { data, error } = await supabase.auth.signUp({
         email: cleanEmail,

@@ -30,34 +30,35 @@ export default function RegisterForm() {
   const lastNameValidation = validateLastName(lastName);
   const emailValidation = validateEmail(email);
 
+  const nameError = (touched.name || name.length >= 2) && !nameValidation.valid ? nameValidation.message : undefined;
+  const lastNameError = (touched.lastName || lastName.length >= 2) && !lastNameValidation.valid ? lastNameValidation.message : undefined;
+  const emailError = (touched.email || email.length >= 3) && !emailValidation.valid ? emailValidation.message : undefined;
+
   const handleBlur = (field: string) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setTouched({ name: true, lastName: true, email: true, password: true, confirmPassword: true });
 
-    // Validate Name with Regex & Sanity checks
+    // Validate Name with strict regex & anti-gibberish
     if (!nameValidation.valid) {
       showToast(nameValidation.message, 'error');
+      setTouched((prev) => ({ ...prev, name: true }));
       return;
     }
 
-    // Validate Last Name with Regex & Sanity checks
+    // Validate Last Name with strict regex & anti-gibberish
     if (!lastNameValidation.valid) {
       showToast(lastNameValidation.message, 'error');
+      setTouched((prev) => ({ ...prev, lastName: true }));
       return;
     }
 
-    // Validate Email with Regex
+    // Validate Email
     if (!emailValidation.valid) {
       showToast(emailValidation.message, 'error');
-      return;
-    }
-
-    if (password.length < 8) {
-      showToast('La contraseña debe tener al menos 8 caracteres', 'error');
+      setTouched((prev) => ({ ...prev, email: true }));
       return;
     }
 
@@ -79,10 +80,6 @@ export default function RegisterForm() {
     }
   };
 
-  const nameError = (touched.name || (name.length >= 2 && !nameValidation.valid)) ? nameValidation.message : undefined;
-  const lastNameError = (touched.lastName || (lastName.length >= 2 && !lastNameValidation.valid)) ? lastNameValidation.message : undefined;
-  const emailError = (touched.email && !emailValidation.valid) ? emailValidation.message : undefined;
-
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
       <div className={styles.row2col}>
@@ -91,7 +88,10 @@ export default function RegisterForm() {
             label="Nombre"
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value);
+              setTouched((prev) => ({ ...prev, name: true }));
+            }}
             onBlur={() => handleBlur('name')}
             error={nameError}
             placeholder="Tu nombre"
@@ -105,7 +105,10 @@ export default function RegisterForm() {
             label="Apellido"
             type="text"
             value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
+            onChange={(e) => {
+              setLastName(e.target.value);
+              setTouched((prev) => ({ ...prev, lastName: true }));
+            }}
             onBlur={() => handleBlur('lastName')}
             error={lastNameError}
             placeholder="Tu apellido"
@@ -120,7 +123,10 @@ export default function RegisterForm() {
           label="Correo Electrónico"
           type="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setTouched((prev) => ({ ...prev, email: true }));
+          }}
           onBlur={() => handleBlur('email')}
           error={emailError}
           placeholder="ejemplo@correo.com"

@@ -8,7 +8,7 @@ import MainLayout from '@/components/templates/MainLayout/MainLayout';
 import ToastContainer from '@/components/organisms/ToastContainer/ToastContainer';
 import JsonLd from '@/components/atoms/JsonLd/JsonLd';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://sublimaci-n-seven.vercel.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://sublilove.com';
 
 export const viewport: Viewport = {
   width: 'device-width',

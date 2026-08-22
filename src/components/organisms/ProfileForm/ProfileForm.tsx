@@ -36,26 +36,32 @@ export default function ProfileForm() {
   const lastNameValidation = validateLastName(lastName);
   const emailValidation = validateEmail(email);
 
+  const nameError = (touched.name || (name.length > 0 && name !== currentUser.name)) && !nameValidation.valid ? nameValidation.message : undefined;
+  const lastNameError = (touched.lastName || (lastName.length > 0 && lastName !== currentUser.last_name)) && !lastNameValidation.valid ? lastNameValidation.message : undefined;
+  const emailError = (touched.email || (email.length > 0 && email !== (currentUser.email || currentUser.mail))) && !emailValidation.valid ? emailValidation.message : undefined;
+
   const handleBlur = (field: string) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setTouched({ name: true, lastName: true, email: true });
 
     if (!nameValidation.valid) {
       showToast(nameValidation.message, 'error');
+      setTouched((prev) => ({ ...prev, name: true }));
       return;
     }
 
-    if (!lastNameValidation.valid) {
+    if (lastName.trim() && !lastNameValidation.valid) {
       showToast(lastNameValidation.message, 'error');
+      setTouched((prev) => ({ ...prev, lastName: true }));
       return;
     }
 
     if (!emailValidation.valid) {
       showToast(emailValidation.message, 'error');
+      setTouched((prev) => ({ ...prev, email: true }));
       return;
     }
 
@@ -81,9 +87,6 @@ export default function ProfileForm() {
   };
 
   const fullName = `${currentUser.name || ''} ${currentUser.last_name || ''}`.trim() || 'Usuario';
-  const nameError = (touched.name || (name.length >= 2 && !nameValidation.valid)) ? nameValidation.message : undefined;
-  const lastNameError = (touched.lastName || (lastName.length >= 2 && !lastNameValidation.valid)) ? lastNameValidation.message : undefined;
-  const emailError = (touched.email && !emailValidation.valid) ? emailValidation.message : undefined;
 
   return (
     <div
@@ -123,7 +126,10 @@ export default function ProfileForm() {
               label="Nombre"
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                setTouched((prev) => ({ ...prev, name: true }));
+              }}
               onBlur={() => handleBlur('name')}
               error={nameError}
               placeholder="Tu nombre"
@@ -137,11 +143,13 @@ export default function ProfileForm() {
               label="Apellido"
               type="text"
               value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              onChange={(e) => {
+                setLastName(e.target.value);
+                setTouched((prev) => ({ ...prev, lastName: true }));
+              }}
               onBlur={() => handleBlur('lastName')}
               error={lastNameError}
               placeholder="Tu apellido"
-              required
               disabled={submitting}
             />
           </div>
@@ -152,7 +160,10 @@ export default function ProfileForm() {
             label="Correo Electrónico"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setTouched((prev) => ({ ...prev, email: true }));
+            }}
             onBlur={() => handleBlur('email')}
             error={emailError}
             placeholder="ejemplo@correo.com"
