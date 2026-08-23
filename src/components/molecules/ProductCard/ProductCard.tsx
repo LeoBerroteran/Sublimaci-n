@@ -20,6 +20,10 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { showToast } = useToast();
   const router = useRouter();
 
+  const handleCardClick = () => {
+    router.push(`/producto/${product.id}`);
+  };
+
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -37,7 +41,11 @@ export default function ProductCard({ product }: ProductCardProps) {
   const badgeClass = String(product.badge).toLowerCase() === 'popular' ? 'badge-popular' : 'badge-nuevo';
 
   return (
-    <div className="product-card">
+    <div
+      className="product-card"
+      onClick={handleCardClick}
+      style={{ cursor: 'pointer' }}
+    >
       <div className={`product-card-image cat-${product.category}`} style={{ position: 'relative' }}>
         <Image
           src={product.image || '/img/logo.png'}
@@ -58,7 +66,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <PriceTag priceUSD={product.price} />
         </div>
 
-        <div className="product-card-actions">
+        <div className="product-card-actions" onClick={(e) => e.stopPropagation()}>
           <Button href={`/producto/${product.id}`} variant="outline" size="sm" style={{ flex: 1 }}>
             Ver Detalle
           </Button>

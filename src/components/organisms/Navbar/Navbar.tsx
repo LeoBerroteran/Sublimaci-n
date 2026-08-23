@@ -75,6 +75,7 @@ export default function Navbar() {
           <li>
             <Link
               href="/"
+              prefetch={true}
               className={`nav-link ${isLinkActive('/') ? 'active' : ''}`}
             >
               Inicio
@@ -83,6 +84,7 @@ export default function Navbar() {
           <li>
             <Link
               href="/catalogo"
+              prefetch={true}
               className={`nav-link ${isLinkActive('/catalogo') ? 'active' : ''}`}
             >
               Catálogo
@@ -91,6 +93,7 @@ export default function Navbar() {
           <li>
             <Link
               href="/faq"
+              prefetch={true}
               className={`nav-link ${isLinkActive('/faq') ? 'active' : ''}`}
             >
               FAQ
@@ -100,6 +103,7 @@ export default function Navbar() {
             <li>
               <Link
                 href="/admin"
+                prefetch={true}
                 className={`nav-link ${isLinkActive('/admin') ? 'active' : ''}`}
               >
                 Admin
@@ -173,6 +177,7 @@ export default function Navbar() {
             <div className="mobile-nav-items">
               <Link
                 href="/"
+                prefetch={true}
                 onClick={closeMobileMenu}
                 className={`mobile-nav-link ${isLinkActive('/') ? 'active' : ''}`}
               >
@@ -180,6 +185,7 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/catalogo"
+                prefetch={true}
                 onClick={closeMobileMenu}
                 className={`mobile-nav-link ${isLinkActive('/catalogo') ? 'active' : ''}`}
               >
@@ -187,6 +193,7 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/faq"
+                prefetch={true}
                 onClick={closeMobileMenu}
                 className={`mobile-nav-link ${isLinkActive('/faq') ? 'active' : ''}`}
               >

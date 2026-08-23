@@ -1,6 +1,5 @@
 import React from 'react';
 import Input from '@/components/atoms/Input/Input';
-import styles from './FormField.module.css';
 
 export interface FormFieldProps {
   label: string;
@@ -32,12 +31,10 @@ export default function FormField({
   const errorMessage = typeof error === 'string' ? error : error ? 'Campo requerido' : undefined;
 
   return (
-    <div className={styles.formField || styles.field}>
-      <label htmlFor={id} className={styles.label}>
-        {label} {required && <span className={styles.required}>*</span>}
-      </label>
+    <div style={{ width: '100%', marginBottom: '6px' }}>
       <Input
         id={id}
+        label={label}
         type={type}
         value={value}
         onChange={onChange}

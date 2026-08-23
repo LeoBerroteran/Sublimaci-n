@@ -1150,3 +1150,45 @@ h6 { font-weight: 500; }
     text-align: center;
   }
 }
+
+/* --------------------------------------------------------------------------
+   14. High-Contrast Form Inputs & Text Fields (Light & Dark Theme)
+   -------------------------------------------------------------------------- */
+input, textarea, select {
+  font-family: var(--font-body);
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background-color: #282828 !important;
+  color: #ffffff !important;
+  border-color: #444444 !important;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: #a0a0a0 !important;
+  opacity: 0.85 !important;
+}
+
+[data-theme="light"] input,
+:root:not([data-theme="dark"]) input,
+[data-theme="light"] textarea,
+:root:not([data-theme="dark"]) textarea,
+[data-theme="light"] select,
+:root:not([data-theme="dark"]) select {
+  background-color: #ffffff !important;
+  color: #242424 !important;
+  border-color: #c8c8c4 !important;
+}
+
+[data-theme="light"] input::placeholder,
+:root:not([data-theme="dark"]) input::placeholder,
+[data-theme="light"] textarea::placeholder,
+:root:not([data-theme="dark"]) textarea::placeholder {
+  color: #767676 !important;
+  opacity: 0.85 !important;
+}
+

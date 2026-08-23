@@ -23,7 +23,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           className={`${styles.input} ${error ? styles.inputError : ''}`}
           {...props}
         />
-        {error && <span className={styles.errorMessage}>{error}</span>}
+        <div className={styles.errorSlot} aria-live="polite">
+          {error && <span className={styles.errorMessage}>{error}</span>}
+        </div>
       </div>
     );
   }

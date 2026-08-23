@@ -83,59 +83,53 @@ export default function RegisterForm() {
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
       <div className={styles.row2col}>
-        <div>
-          <FormField
-            label="Nombre"
-            type="text"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              setTouched((prev) => ({ ...prev, name: true }));
-            }}
-            onBlur={() => handleBlur('name')}
-            error={nameError}
-            placeholder="Tu nombre"
-            required
-            disabled={submitting}
-          />
-        </div>
-
-        <div>
-          <FormField
-            label="Apellido"
-            type="text"
-            value={lastName}
-            onChange={(e) => {
-              setLastName(e.target.value);
-              setTouched((prev) => ({ ...prev, lastName: true }));
-            }}
-            onBlur={() => handleBlur('lastName')}
-            error={lastNameError}
-            placeholder="Tu apellido"
-            required
-            disabled={submitting}
-          />
-        </div>
-      </div>
-
-      <div>
         <FormField
-          label="Correo Electrónico"
-          type="email"
-          value={email}
+          label="Nombre"
+          type="text"
+          value={name}
           onChange={(e) => {
-            setEmail(e.target.value);
-            setTouched((prev) => ({ ...prev, email: true }));
+            setName(e.target.value);
+            setTouched((prev) => ({ ...prev, name: true }));
           }}
-          onBlur={() => handleBlur('email')}
-          error={emailError}
-          placeholder="ejemplo@correo.com"
+          onBlur={() => handleBlur('name')}
+          error={nameError}
+          placeholder="Tu nombre"
+          required
+          disabled={submitting}
+        />
+
+        <FormField
+          label="Apellido"
+          type="text"
+          value={lastName}
+          onChange={(e) => {
+            setLastName(e.target.value);
+            setTouched((prev) => ({ ...prev, lastName: true }));
+          }}
+          onBlur={() => handleBlur('lastName')}
+          error={lastNameError}
+          placeholder="Tu apellido"
           required
           disabled={submitting}
         />
       </div>
 
-      <div>
+      <FormField
+        label="Correo Electrónico"
+        type="email"
+        value={email}
+        onChange={(e) => {
+          setEmail(e.target.value);
+          setTouched((prev) => ({ ...prev, email: true }));
+        }}
+        onBlur={() => handleBlur('email')}
+        error={emailError}
+        placeholder="ejemplo@correo.com"
+        required
+        disabled={submitting}
+      />
+
+      <div className={styles.row2col}>
         <FormField
           label="Contraseña"
           type="password"
@@ -145,35 +139,19 @@ export default function RegisterForm() {
           required
           disabled={submitting}
         />
-        {password.length > 0 && (
-          <div className={styles.criteriaList}>
-            {criteria.map((c, i) => {
-              const met = c.pattern.test(password);
-              return (
-                <div
-                  key={i}
-                  className={`${styles.criteriaItem} ${met ? styles.criteriaMet : styles.criteriaUnmet}`}
-                >
-                  <span>{met ? '✓' : '✗'}</span>
-                  <span>{c.label}</span>
-                </div>
-              );
-            })}
-          </div>
-        )}
+
+        <FormField
+          label="Confirmar Contraseña"
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="••••••••"
+          required
+          disabled={submitting}
+        />
       </div>
 
-      <FormField
-        label="Confirmar Contraseña"
-        type="password"
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        placeholder="••••••••"
-        required
-        disabled={submitting}
-      />
-
-      <Button type="submit" variant="primary" fullWidth disabled={submitting} style={{ marginTop: '8px' }}>
+      <Button type="submit" variant="primary" fullWidth disabled={submitting} style={{ marginTop: '4px' }}>
         {submitting ? 'Creando cuenta...' : 'Crear Cuenta'}
       </Button>
 

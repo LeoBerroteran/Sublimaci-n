@@ -28,20 +28,21 @@
   padding: 12px 32px;
   border-radius: var(--radius-sm);
   background-color: var(--primary);
-  color: var(--white);
+  color: #ffffff !important;
   font-weight: 600;
   transition: var(--transition);
 }
 
 .viewMoreBtn:hover {
   background-color: var(--primary-dark);
+  color: #ffffff !important;
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(169, 115, 130, 0.4);
 }
 
 .ctaSection {
-  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-  color: var(--white);
+  background: linear-gradient(135deg, #8a5c6b 0%, #a97382 100%) !important;
+  color: #ffffff !important;
   padding: 80px 0;
   text-align: center;
   border-radius: var(--radius-lg);
@@ -57,7 +58,7 @@
 
 .ctaText {
   font-size: 1.15rem;
-  color: #ffffff;
+  color: #ffffff !important;
   opacity: 0.95;
   max-width: 600px;
   margin: 0 auto 32px;
@@ -69,15 +70,19 @@
   gap: 8px;
   padding: 16px 36px;
   border-radius: var(--radius-sm);
-  background-color: #25D366;
-  color: var(--white);
+  background-color: #25D366 !important;
+  color: #ffffff !important;
   font-weight: 700;
   font-size: 1.1rem;
+  border: none;
+  cursor: pointer;
   transition: var(--transition);
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
 }
 
 .ctaButton:hover {
-  background-color: #1da851;
+  background-color: #1da851 !important;
+  color: #ffffff !important;
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+  box-shadow: 0 6px 22px rgba(37, 211, 102, 0.45);
 }

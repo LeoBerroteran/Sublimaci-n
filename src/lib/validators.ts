@@ -7,16 +7,16 @@ export function isLikelyGibberish(text: string): { isGibberish: boolean; reason:
   const clean = text.trim();
 
   if (clean.length < 2) {
-    return { isGibberish: true, reason: 'Debe tener al menos 2 caracteres' };
+    return { isGibberish: true, reason: 'Mínimo 2 letras' };
   }
 
   if (clean.length > 30) {
-    return { isGibberish: true, reason: 'No puede exceder los 30 caracteres' };
+    return { isGibberish: true, reason: 'Máximo 30 letras' };
   }
 
   // Only allowed characters (letters, accents, ñ, ü, and single spaces)
   if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/.test(clean)) {
-    return { isGibberish: true, reason: 'Solo se permiten letras y espacios (sin números ni símbolos)' };
+    return { isGibberish: true, reason: 'Solo letras y espacios' };
   }
 
   const words = clean.split(/\s+/).filter(Boolean);
@@ -25,37 +25,37 @@ export function isLikelyGibberish(text: string): { isGibberish: boolean; reason:
     const lowerWord = word.toLowerCase();
 
     if (lowerWord.length < 2) {
-      return { isGibberish: true, reason: 'Cada palabra o nombre debe tener al menos 2 letras' };
+      return { isGibberish: true, reason: 'Mínimo 2 letras por palabra' };
     }
 
     if (lowerWord.length > 18) {
-      return { isGibberish: true, reason: 'Ingresa un nombre real (palabra demasiado larga)' };
+      return { isGibberish: true, reason: 'Palabra demasiado larga' };
     }
 
     // Repeated characters: 3 or more identical characters in a row (e.g. aaa, fff)
     if (/(.)\1{2,}/i.test(lowerWord)) {
-      return { isGibberish: true, reason: 'No se permiten caracteres repetidos consecutivamente' };
+      return { isGibberish: true, reason: 'Sin letras repetidas seguidas' };
     }
 
     // Must contain at least one vowel
     const vowels = lowerWord.match(/[aeiouáéíóúüy]/g);
     if (!vowels || vowels.length === 0) {
-      return { isGibberish: true, reason: 'Debe contener vocales válidas' };
+      return { isGibberish: true, reason: 'Debe incluir vocales válidas' };
     }
 
     // Vowel ratio check for words with 4+ letters
     if (lowerWord.length >= 4 && vowels.length / lowerWord.length < 0.20) {
-      return { isGibberish: true, reason: 'Ingresa un nombre válido (demasiadas consonantes seguidas)' };
+      return { isGibberish: true, reason: 'Demasiadas consonantes seguidas' };
     }
 
     // 4 or more consecutive consonants (e.g. dskj, fhdsk, rtxw)
     if (/[bcdfghjklmnñpqrstvwxz]{4,}/i.test(lowerWord)) {
-      return { isGibberish: true, reason: 'Ingresa un nombre válido (combinación de letras no válida)' };
+      return { isGibberish: true, reason: 'Combinación no válida' };
     }
 
     // 4 or more consecutive vowels (e.g. aeiou)
     if (/[aeiouáéíóúü]{4,}/i.test(lowerWord)) {
-      return { isGibberish: true, reason: 'Ingresa un nombre válido (demasiadas vocales seguidas)' };
+      return { isGibberish: true, reason: 'Demasiadas vocales seguidas' };
     }
 
     // Common keyboard mash sequences
@@ -69,7 +69,7 @@ export function isLikelyGibberish(text: string): { isGibberish: boolean; reason:
     ];
     for (const seq of mashSequences) {
       if (lowerWord.includes(seq)) {
-        return { isGibberish: true, reason: 'Ingresa un nombre real (no uses secuencias del teclado)' };
+        return { isGibberish: true, reason: 'Sin secuencias de teclado' };
       }
     }
   }

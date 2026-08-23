@@ -11,7 +11,7 @@ export const PRODUCTS: Product[] = [
   { id: 7, name: 'Cuaderno Personalizado', category: 'papeleria', description: 'Cuaderno con portada personalizada en alta resolución. Hojas de papel bond de alta calidad para una escritura suave.', price: 7, materials: 'Pasta dura laminada, 100 hojas papel bond 90gr', sizes: ['A5 (15x21cm)', 'A4 (21x29cm)', 'Carta (22x28cm)'], printArea: 'Portada y contraportada completas', icon: '📓', image: '/img/cuaderno_personalizado.jpg', featured: true, badge: null },
   { id: 8, name: 'Agenda 2025', category: 'papeleria', description: 'Agenda anual con diseño personalizado. Incluye calendario, planificador mensual y semanal, páginas de notas y directorio.', price: 12, materials: 'Pasta dura premium con acabado mate, papel bond 90gr', sizes: ['A5 (15x21cm)', 'A4 (21x29cm)'], printArea: 'Portada, contraportada y lomo', icon: '📅', image: '/img/agenda_personalizada.jpg', featured: true, badge: 'Nuevo' },
   { id: 9, name: 'Pack de Stickers', category: 'papeleria', description: 'Stickers personalizados impresos en vinil de alta calidad. Resistentes al agua y a la intemperie. Ideales para decorar, etiquetar y regalar.', price: 4, materials: 'Vinil adhesivo brillante, laminado UV', sizes: ['5x5cm (pack 10-15)', '7x7cm (pack 8-12)', '10x10cm (pack 5-8)'], printArea: 'Superficie completa del sticker', icon: '🏷️', image: '/img/pack_stickers.jpg', featured: false, badge: null },
-  { id: 10, name: 'Tarjetas Personalizadas', category: 'papeleria', description: 'Tarjetas de presentación, invitación o agradecimiento con diseño a full color. Impresión premium en ambas caras.', price: 5, materials: 'Cartulina opalina 250gr, acabado satinado', sizes: ['9x5cm (25-50 uds)', '9x5cm (50-100 uds)', '14x9cm (25-50 uds)'], printArea: 'Ambas caras a full color', icon: '🎴', image: '/img/tarjetas_personalizadas.jpg', featured: false, badge: null },
+  { id: 10, name: 'Tarjetas Personalizadas', category: 'papeleria', description: 'Tarjetas de presentación, invitation o agradecimiento con diseño a full color. Impresión premium en ambas caras.', price: 5, materials: 'Cartulina opalina 250gr, acabado satinado', sizes: ['9x5cm (25-50 uds)', '9x5cm (50-100 uds)', '14x9cm (25-50 uds)'], printArea: 'Ambas caras a full color', icon: '🎴', image: '/img/tarjetas_personalizadas.jpg', featured: false, badge: null },
   { id: 11, name: 'Sobres Personalizados', category: 'papeleria', description: 'Sobres para correspondencia o packaging con tu marca. Impresión de alta calidad en papel bond premium.', price: 6, materials: 'Papel bond premium 120gr', sizes: ['Carta (24x10.5cm)', 'Oficio (25x11cm)', 'A4 (23x11cm)'], printArea: 'Solapa superior y frente completo', icon: '✉️', image: '/img/sobres_personalizados.jpg', featured: false, badge: null },
   { id: 12, name: 'Planner Semanal', category: 'papeleria', description: 'Planificador semanal con diseño personalizado. Espiral metálico resistente y hojas de alta calidad para organizar tu semana.', price: 9, materials: 'Papel bond 90gr, espiral metálico doble-O', sizes: ['A5 (15x21cm)', 'A4 (21x29cm)'], printArea: 'Portada completa y separadores', icon: '📋', image: '/img/planner_semanal.jpg', featured: false, badge: 'Popular' },
 ];
@@ -39,71 +39,92 @@ export function mapDbProductToProduct(row: any): Product {
   };
 }
 
-export async function fetchProducts(): Promise<Product[]> {
+let cachedProducts: Product[] | null = null;
+let lastFetchTime = 0;
+const CACHE_TTL = 30 * 1000; // 30 seconds
+
+export function invalidateProductsCache() {
+  cachedProducts = null;
+  lastFetchTime = 0;
+}
+
+export async function fetchProducts(forceRefresh = false): Promise<Product[]> {
+  const now = Date.now();
+  if (!forceRefresh && cachedProducts && (now - lastFetchTime < CACHE_TTL)) {
+    return cachedProducts;
+  }
+
   try {
     const supabase = createClient();
-    const queryPromise = supabase
+    const { data, error } = await supabase
       .from('Products')
       .select('*')
       .eq('deleted', false)
       .order('creation_date', { ascending: true });
 
-    const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) =>
-      setTimeout(() => resolve({ data: null, error: new Error('Timeout') }), 3000)
-    );
-
-    const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
-
-    if (error || !data || data.length === 0) {
-      return PRODUCTS;
+    if (!error && data && data.length > 0) {
+      const mapped = data.map(mapDbProductToProduct);
+      cachedProducts = mapped;
+      lastFetchTime = now;
+      return mapped;
     }
-    return data.map(mapDbProductToProduct);
-  } catch {
-    return PRODUCTS;
+  } catch (err) {
+    console.error('Error fetching products from DB:', err);
   }
+
+  if (cachedProducts) {
+    return cachedProducts;
+  }
+  return PRODUCTS;
 }
 
 export async function fetchProductById(id: string | number): Promise<Product | undefined> {
+  const all = await fetchProducts();
+  const found = all.find((p) => String(p.id) === String(id));
+  if (found) return found;
+
   try {
     const supabase = createClient();
-    const queryPromise = supabase
+    const { data, error } = await supabase
       .from('Products')
       .select('*')
       .eq('id', id)
       .eq('deleted', false)
       .maybeSingle();
 
-    const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) =>
-      setTimeout(() => resolve({ data: null, error: new Error('Timeout') }), 3000)
-    );
-
-    const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
-
-    if (error || !data) {
-      return PRODUCTS.find((p) => String(p.id) === String(id));
+    if (!error && data) {
+      return mapDbProductToProduct(data);
     }
-    return mapDbProductToProduct(data);
   } catch {
-    return PRODUCTS.find((p) => String(p.id) === String(id));
+    // fallback
   }
+
+  return PRODUCTS.find((p) => String(p.id) === String(id));
 }
 
 export function getProductById(id: string | number): Product | undefined {
+  if (cachedProducts) {
+    const found = cachedProducts.find((p) => String(p.id) === String(id));
+    if (found) return found;
+  }
   return PRODUCTS.find((p) => String(p.id) === String(id));
 }
 
 export function getProductsByCategory(category: Product['category']): Product[] {
-  return PRODUCTS.filter((p) => p.category === category);
+  const list = cachedProducts || PRODUCTS;
+  return list.filter((p) => p.category === category);
 }
 
 export function getFeaturedProducts(): Product[] {
-  return PRODUCTS.filter((p) => p.featured);
+  const list = cachedProducts || PRODUCTS;
+  return list.filter((p) => p.featured);
 }
 
 export function searchProducts(query: string): Product[] {
   const q = query.toLowerCase().trim();
-  if (!q) return PRODUCTS;
-  return PRODUCTS.filter(
+  if (!q) return cachedProducts || PRODUCTS;
+  const list = cachedProducts || PRODUCTS;
+  return list.filter(
     (p) =>
       p.name.toLowerCase().includes(q) ||
       p.description.toLowerCase().includes(q) ||

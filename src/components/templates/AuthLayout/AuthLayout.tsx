@@ -19,16 +19,17 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
           {children}
         </div>
 
-        {/* Right Column: Decorative Brand Banner Image (Desktop) */}
+        {/* Right Column: Decorative Brand Banner with Full Pink Gradient (Desktop) */}
         <div className={styles.bannerColumn}>
           <Image
             src="/img/agenda_personalizada.jpg"
             alt="Subli Love Productos Personalizados"
             fill
             sizes="500px"
-            style={{ objectFit: 'cover', opacity: 0.35, mixBlendMode: 'overlay' }}
+            style={{ objectFit: 'cover', objectPosition: 'center center', opacity: 0.45, mixBlendMode: 'overlay' }}
             priority
           />
+          <div className={styles.bannerOverlay} />
           <div className={styles.bannerContent}>
             <div className={styles.bannerBadge}>
               ✨ Sublilove
