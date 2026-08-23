@@ -34,6 +34,25 @@ export default function RegisterForm() {
   const lastNameError = (touched.lastName || lastName.length >= 2) && !lastNameValidation.valid ? lastNameValidation.message : undefined;
   const emailError = (touched.email || email.length >= 3) && !emailValidation.valid ? emailValidation.message : undefined;
 
+  const getPasswordValidationMessage = (pwd: string) => {
+    if (!pwd) return 'La contraseña es obligatoria';
+    if (pwd.length < 8) return 'Mínimo 8 caracteres';
+    if (!/[A-Z]/.test(pwd)) return 'Falta 1 letra mayúscula (A-Z)';
+    if (!/[a-z]/.test(pwd)) return 'Falta 1 letra minúscula (a-z)';
+    if (!/\d/.test(pwd)) return 'Falta 1 número (0-9)';
+    if (!/[@$!%*?&#+\-_.]/.test(pwd)) return 'Falta 1 carácter especial (@$!%*?&#+-_.)';
+    return undefined;
+  };
+
+  const passwordError = (touched.password || password.length > 0) ? getPasswordValidationMessage(password) : undefined;
+  const confirmPasswordError = (touched.confirmPassword || confirmPassword.length > 0)
+    ? (!confirmPassword
+        ? 'Confirma tu contraseña'
+        : password !== confirmPassword
+        ? 'Las contraseñas no coinciden'
+        : undefined)
+    : undefined;
+
   const handleBlur = (field: string) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
   };
@@ -62,8 +81,17 @@ export default function RegisterForm() {
       return;
     }
 
+    // Validate Password
+    const pwdErr = getPasswordValidationMessage(password);
+    if (pwdErr) {
+      showToast(pwdErr, 'error');
+      setTouched((prev) => ({ ...prev, password: true }));
+      return;
+    }
+
     if (password !== confirmPassword) {
       showToast('Las contraseñas no coinciden', 'error');
+      setTouched((prev) => ({ ...prev, confirmPassword: true }));
       return;
     }
 
@@ -134,7 +162,12 @@ export default function RegisterForm() {
           label="Contraseña"
           type="password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            setTouched((prev) => ({ ...prev, password: true }));
+          }}
+          onBlur={() => handleBlur('password')}
+          error={passwordError}
           placeholder="••••••••"
           required
           disabled={submitting}
@@ -144,12 +177,49 @@ export default function RegisterForm() {
           label="Confirmar Contraseña"
           type="password"
           value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
+          onChange={(e) => {
+            setConfirmPassword(e.target.value);
+            setTouched((prev) => ({ ...prev, confirmPassword: true }));
+          }}
+          onBlur={() => handleBlur('confirmPassword')}
+          error={confirmPasswordError}
           placeholder="••••••••"
           required
           disabled={submitting}
         />
       </div>
+
+      {password.length > 0 && (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+          gap: '4px 10px',
+          padding: '8px 12px',
+          borderRadius: '8px',
+          backgroundColor: 'var(--neutral-light)',
+          fontSize: '0.75rem',
+          margin: '-4px 0 8px',
+        }}>
+          {criteria.map((c, i) => {
+            const met = c.pattern.test(password);
+            return (
+              <div
+                key={i}
+                style={{
+                  color: met ? '#2e7d32' : '#d32f2f',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontWeight: met ? 600 : 400,
+                }}
+              >
+                <span>{met ? '✓' : '•'}</span>
+                <span>{c.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <Button type="submit" variant="primary" fullWidth disabled={submitting} style={{ marginTop: '4px' }}>
         {submitting ? 'Creando cuenta...' : 'Crear Cuenta'}
