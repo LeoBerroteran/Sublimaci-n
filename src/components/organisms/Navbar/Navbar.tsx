@@ -33,7 +33,7 @@ export default function Navbar() {
       if (e.key === 'Escape') setMobileMenuOpen(false);
     };
     const handleResize = () => {
-      if (window.innerWidth > 880) setMobileMenuOpen(false);
+      if (window.innerWidth > 1024) setMobileMenuOpen(false);
     };
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('resize', handleResize);

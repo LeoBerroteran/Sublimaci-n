@@ -1,3 +1,4 @@
+import React, { Suspense } from 'react';
 import type { Metadata } from 'next';
 import CatalogView from '@/components/organisms/CatalogView/CatalogView';
 import { fetchProducts } from '@/data/products';
@@ -11,7 +12,7 @@ export const revalidate = 0;
 export const metadata: Metadata = {
   title: 'Catálogo Completo | Sublilove',
   description:
-    'Explora nuestro catálogo completo de productos de sublimación y papelería personalizada. Tazas, franelas, termos, libretas, agendas, stickers y mucho más.',
+    'Explora nuestro catálogo completo de productos de sublimación y papelería personalizada. Tazas, franelas, termos, libretas, agendas 2026, stickers y mucho más.',
   openGraph: {
     title: 'Catálogo de Productos | Sublilove',
     description:
@@ -24,7 +25,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function CatalogPage() {
+interface CatalogPageProps {
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function CatalogPage(props: CatalogPageProps) {
+  const resolvedParams = props.searchParams ? await props.searchParams : {};
+  const rawCat = resolvedParams.categoria || resolvedParams.cat || resolvedParams.category;
+  const initialCategory = typeof rawCat === 'string' ? rawCat : undefined;
+
   const products = await fetchProducts();
 
   const catalogSchema = {
@@ -47,7 +56,9 @@ export default async function CatalogPage() {
   return (
     <>
       <JsonLd data={catalogSchema} />
-      <CatalogView initialProducts={products} />
+      <Suspense fallback={<div className="container" style={{ padding: '80px 0', textAlign: 'center' }}>Cargando catálogo...</div>}>
+        <CatalogView initialProducts={products} initialCategory={initialCategory} />
+      </Suspense>
     </>
   );
 }

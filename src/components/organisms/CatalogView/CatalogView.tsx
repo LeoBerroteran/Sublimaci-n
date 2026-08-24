@@ -1,24 +1,45 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import ProductGrid from '@/components/organisms/ProductGrid/ProductGrid';
 import { fetchProducts } from '@/data/products';
 import { Product } from '@/types';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const ITEMS_PER_PAGE = 8;
+const ITEMS_PER_PAGE = 9;
 
 interface CatalogViewProps {
   initialProducts: Product[];
+  initialCategory?: string;
 }
 
-export default function CatalogView({ initialProducts }: CatalogViewProps) {
+const parseCategory = (cat: string | null | undefined): 'todos' | 'sublimacion' | 'papeleria' => {
+  if (!cat) return 'todos';
+  const lower = cat.toLowerCase().trim();
+  if (lower.includes('subli')) return 'sublimacion';
+  if (lower.includes('pape')) return 'papeleria';
+  return 'todos';
+};
+
+export default function CatalogView({ initialProducts, initialCategory }: CatalogViewProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const catParam = searchParams.get('categoria') || searchParams.get('cat') || searchParams.get('category') || initialCategory;
+
   const [products, setProducts] = useState<Product[]>(initialProducts);
-  const [selectedCategory, setSelectedCategory] = useState<'todos' | 'sublimacion' | 'papeleria'>('todos');
+  const [selectedCategory, setSelectedCategory] = useState<'todos' | 'sublimacion' | 'papeleria'>(() => parseCategory(catParam));
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
   const gridTopRef = useRef<HTMLDivElement>(null);
+
+  // Sync category state whenever URL search param changes
+  useEffect(() => {
+    const currentParam = searchParams.get('categoria') || searchParams.get('cat') || searchParams.get('category');
+    setSelectedCategory(parseCategory(currentParam));
+    setCurrentPage(1);
+  }, [searchParams]);
 
   // Sync with Supabase client-side if updated
   useEffect(() => {
@@ -39,10 +60,12 @@ export default function CatalogView({ initialProducts }: CatalogViewProps) {
     };
   }, []);
 
-  // Reset to page 1 whenever search or category changes
+  // Reset to page 1 whenever search or category changes & update URL
   const handleCategoryChange = (cat: 'todos' | 'sublimacion' | 'papeleria') => {
     setSelectedCategory(cat);
     setCurrentPage(1);
+    const newUrl = cat === 'todos' ? '/catalogo' : `/catalogo?categoria=${cat}`;
+    router.replace(newUrl, { scroll: false });
   };
 
   const handleSearchChange = (query: string) => {
@@ -197,108 +220,88 @@ export default function CatalogView({ initialProducts }: CatalogViewProps) {
             {totalPages > 1 && (
               <div
                 style={{
-                  marginTop: '44px',
+                  marginTop: '48px',
                   display: 'flex',
-                  flexDirection: 'column',
+                  justifyContent: 'center',
                   alignItems: 'center',
-                  gap: '16px',
+                  gap: '8px',
+                  flexWrap: 'wrap',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <button
+                  type="button"
+                  disabled={currentPage === 1}
+                  onClick={() => goToPage(currentPage - 1)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '8px 16px',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--neutral-dark)',
+                    backgroundColor: 'var(--white)',
+                    color: 'var(--text)',
+                    fontSize: '0.9rem',
+                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                    opacity: currentPage === 1 ? 0.5 : 1,
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <ChevronLeft size={18} /> Anterior
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
                   <button
+                    key={pageNum}
                     type="button"
-                    disabled={currentPage === 1}
-                    onClick={() => goToPage(currentPage - 1)}
+                    onClick={() => goToPage(pageNum)}
                     style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '8px 16px',
-                      borderRadius: '20px',
-                      border: '1px solid var(--neutral-dark)',
-                      backgroundColor: 'var(--white)',
-                      color: 'var(--text)',
-                      fontWeight: 600,
-                      fontSize: '0.9rem',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      opacity: currentPage === 1 ? 0.5 : 1,
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: 'var(--radius-sm)',
+                      border: pageNum === currentPage ? 'none' : '1px solid var(--neutral-dark)',
+                      backgroundColor: pageNum === currentPage ? 'var(--primary)' : 'var(--white)',
+                      color: pageNum === currentPage ? '#ffffff' : 'var(--text)',
+                      fontWeight: pageNum === currentPage ? 700 : 500,
+                      cursor: 'pointer',
                       transition: 'all 0.2s ease',
-                      boxShadow: '0 2px 6px var(--shadow)',
                     }}
                   >
-                    <ChevronLeft size={18} /> Anterior
+                    {pageNum}
                   </button>
+                ))}
 
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
-                    const isActive = pageNum === currentPage;
-                    return (
-                      <button
-                        key={pageNum}
-                        type="button"
-                        onClick={() => goToPage(pageNum)}
-                        style={{
-                          width: '38px',
-                          height: '38px',
-                          borderRadius: '50%',
-                          border: isActive ? '2px solid var(--primary)' : '1px solid var(--neutral-dark)',
-                          backgroundColor: isActive ? 'var(--primary)' : 'var(--white)',
-                          color: isActive ? '#ffffff' : 'var(--text)',
-                          fontWeight: 700,
-                          fontSize: '0.92rem',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease',
-                          boxShadow: isActive ? '0 3px 10px rgba(169, 115, 130, 0.35)' : '0 2px 6px var(--shadow)',
-                        }}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
-
-                  <button
-                    type="button"
-                    disabled={currentPage === totalPages}
-                    onClick={() => goToPage(currentPage + 1)}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '8px 16px',
-                      borderRadius: '20px',
-                      border: '1px solid var(--neutral-dark)',
-                      backgroundColor: 'var(--white)',
-                      color: 'var(--text)',
-                      fontWeight: 600,
-                      fontSize: '0.9rem',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      opacity: currentPage === totalPages ? 0.5 : 1,
-                      transition: 'all 0.2s ease',
-                      boxShadow: '0 2px 6px var(--shadow)',
-                    }}
-                  >
-                    Siguiente <ChevronRight size={18} />
-                  </button>
-                </div>
-
-                <span style={{ fontSize: '0.88rem', color: 'var(--text-light)' }}>
-                  Página {currentPage} de {totalPages} ({filteredProducts.length} productos en total)
-                </span>
+                <button
+                  type="button"
+                  disabled={currentPage === totalPages}
+                  onClick={() => goToPage(currentPage + 1)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '8px 16px',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--neutral-dark)',
+                    backgroundColor: 'var(--white)',
+                    color: 'var(--text)',
+                    fontSize: '0.9rem',
+                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                    opacity: currentPage === totalPages ? 0.5 : 1,
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  Siguiente <ChevronRight size={18} />
+                </button>
               </div>
             )}
           </div>
         ) : (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: '60px 20px',
-              backgroundColor: 'var(--white)',
-              borderRadius: 'var(--radius)',
-              boxShadow: '0 2px 12px var(--shadow)',
-            }}
-          >
-            <h3 style={{ color: 'var(--dark)', marginBottom: '8px' }}>No se encontraron productos</h3>
-            <p style={{ color: 'var(--text-light)' }}>
-              Intenta con otros términos de búsqueda o selecciona otra categoría.
+          <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-light)' }}>
+            <p style={{ fontSize: '1.2rem', marginBottom: '8px' }}>
+              No encontramos productos que coincidan con tu búsqueda.
+            </p>
+            <p style={{ fontSize: '0.95rem' }}>
+              Intenta con otro término o limpia los filtros.
             </p>
           </div>
         )}

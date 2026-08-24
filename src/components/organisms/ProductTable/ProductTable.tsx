@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import Image from 'next/image';
 import { fetchProducts } from '@/data/products';
 import { Product } from '@/types';
 import { createClient } from '@/lib/supabase/client';
@@ -306,10 +307,12 @@ export default function ProductTable() {
                 <tr key={product.id} style={{ borderBottom: '1px solid var(--neutral)' }}>
                   <td style={{ padding: '12px', color: 'var(--text-light)' }}>{(currentPage - 1) * ITEMS_PER_PAGE + index + 1}</td>
                   <td style={{ padding: '12px' }}>
-                    <img
+                    <Image
                       src={product.image || '/img/logo.png'}
                       alt={product.name}
-                      style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--neutral)' }}
+                      width={48}
+                      height={48}
+                      style={{ objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--neutral)' }}
                     />
                   </td>
                   <td style={{ padding: '12px', fontWeight: 600, color: 'var(--dark)' }}>{product.name}</td>
@@ -371,10 +374,12 @@ export default function ProductTable() {
                 }}
               >
                 <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
-                  <img
+                  <Image
                     src={product.image || '/img/logo.png'}
                     alt={product.name}
-                    style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--neutral-dark)', flexShrink: 0 }}
+                    width={60}
+                    height={60}
+                    style={{ objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--neutral-dark)', flexShrink: 0 }}
                   />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '4px' }}>

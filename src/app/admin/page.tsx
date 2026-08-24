@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import AdminClientView from '@/components/organisms/AdminClientView/AdminClientView';
 import { createClient } from '@/lib/supabase/server';
 import { fetchProducts } from '@/data/products';
@@ -12,11 +13,32 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminPage() {
-  let productsCount = 13;
-  let usersCount = 4;
+  const supabase = await createClient();
+
+  // 1. Authenticate user on the server
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login?redirect=/admin');
+  }
+
+  // 2. Authorize admin role from the database
+  const { data: dbUser } = await supabase
+    .from('Users')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (!dbUser || dbUser.role !== 'admin') {
+    redirect('/');
+  }
+
+  let productsCount = 0;
+  let usersCount = 0;
 
   try {
-    const supabase = await createClient();
     const [prodsRes, usersRes] = await Promise.all([
       supabase.from('Products').select('*', { count: 'exact', head: true }).eq('deleted', false),
       supabase.from('Users').select('*', { count: 'exact', head: true }).eq('deleted', false),

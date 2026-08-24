@@ -1,12 +1,17 @@
 import { Product } from '@/types';
 
-const DEFAULT_PHONE = '584243695379';
+export const DEFAULT_WHATSAPP_PHONE = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '584243695379';
+
+export function getWhatsAppPhone(): string {
+  if (typeof window !== 'undefined') {
+    const cached = localStorage.getItem('subli_biz_whatsapp');
+    if (cached && cached.trim()) return cached.trim().replace(/\D/g, '');
+  }
+  return DEFAULT_WHATSAPP_PHONE;
+}
 
 export function getWhatsAppUrl(product: Product, size?: string, quantity: number = 1): string {
-  const phone = typeof window !== 'undefined'
-    ? localStorage.getItem('subli_biz_whatsapp') || DEFAULT_PHONE
-    : DEFAULT_PHONE;
-
+  const phone = getWhatsAppPhone();
   const sizeInfo = size && size !== 'Estándar' ? `, tamaño: ${size}` : '';
   const qtyInfo = quantity > 1 ? ` (Cantidad: ${quantity})` : '';
 
@@ -16,10 +21,7 @@ export function getWhatsAppUrl(product: Product, size?: string, quantity: number
 }
 
 export function getContactWhatsAppUrl(): string {
-  const phone = typeof window !== 'undefined'
-    ? localStorage.getItem('subli_biz_whatsapp') || DEFAULT_PHONE
-    : DEFAULT_PHONE;
-
+  const phone = getWhatsAppPhone();
   const message = 'Hola, quisiera información acerca de los productos de Sublilove.';
 
   return `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;

@@ -8,16 +8,12 @@ import PriceTag from '@/components/atoms/PriceTag/PriceTag';
 import Button from '@/components/atoms/Button/Button';
 import WhatsAppIcon from '@/components/atoms/WhatsAppIcon/WhatsAppIcon';
 import { getWhatsAppUrl } from '@/lib/whatsapp';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/useToast';
 
 interface ProductCardProps {
   product: Product;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const { isLoggedIn } = useAuth();
-  const { showToast } = useToast();
   const router = useRouter();
 
   const handleCardClick = () => {
@@ -27,12 +23,6 @@ export default function ProductCard({ product }: ProductCardProps) {
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    if (!isLoggedIn) {
-      showToast('Inicia sesión para realizar pedidos por WhatsApp', 'info');
-      router.push('/login');
-      return;
-    }
 
     const url = getWhatsAppUrl(product, product.sizes?.[0] || 'Estándar', 1);
     window.open(url, '_blank', 'noopener,noreferrer');

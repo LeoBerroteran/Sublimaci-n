@@ -5,23 +5,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Logo from '@/components/atoms/Logo/Logo';
 import WhatsAppIcon from '@/components/atoms/WhatsAppIcon/WhatsAppIcon';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/useToast';
+import { InstagramIcon, FacebookIcon } from '@/components/atoms/SocialIcons/SocialIcons';
+import { getContactWhatsAppUrl } from '@/lib/whatsapp';
 import { Mail, MapPin } from 'lucide-react';
 
 export default function Footer() {
-  const { isLoggedIn } = useAuth();
-  const { showToast } = useToast();
-  const router = useRouter();
-
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!isLoggedIn) {
-      showToast('Inicia sesión para contactar por WhatsApp', 'info');
-      router.push('/login');
-      return;
-    }
-    window.open('https://wa.me/584243695379', '_blank');
+    const url = getContactWhatsAppUrl();
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -44,8 +36,8 @@ export default function Footer() {
             <ul className="footer-links">
               <li><Link href="/">Inicio</Link></li>
               <li><Link href="/catalogo">Catálogo Completo</Link></li>
-              <li><Link href="/catalogo">Sublimación</Link></li>
-              <li><Link href="/catalogo">Papelería</Link></li>
+              <li><Link href="/catalogo?categoria=sublimacion">Sublimación</Link></li>
+              <li><Link href="/catalogo?categoria=papeleria">Papelería</Link></li>
               <li><Link href="/faq">Preguntas Frecuentes</Link></li>
             </ul>
           </div>
@@ -90,7 +82,7 @@ export default function Footer() {
                 className="social-icon instagram"
                 title="Instagram"
               >
-                <i className="fab fa-instagram"></i>
+                <InstagramIcon size={20} color="#ffffff" />
               </a>
               <a
                 href="https://www.facebook.com/share/1D4XtomhZa/"
@@ -99,7 +91,7 @@ export default function Footer() {
                 className="social-icon facebook"
                 title="Facebook"
               >
-                <i className="fab fa-facebook-f"></i>
+                <FacebookIcon size={20} color="#ffffff" />
               </a>
               <a
                 href="https://wa.me/584243695379"

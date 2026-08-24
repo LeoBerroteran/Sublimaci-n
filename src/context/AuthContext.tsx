@@ -83,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         last_name: finalLastName,
         email: data.mail || email || '',
         mail: data.mail || email || '',
-        role: (data.role === 'admin' || email === 'admin@subli.com') ? 'admin' : 'cliente',
+        role: data.role === 'admin' ? 'admin' : 'cliente',
         creation_date: data.creation_date,
         update_date: data.update_date,
         deleted: data.deleted,
@@ -162,13 +162,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [fetchUserProfile]);
 
-  const login = useCallback(async (email: string, password: string): Promise<{ success: boolean; message: string }> => {
+  const login = useCallback(async (email: string, pass: string): Promise<{ success: boolean; message: string }> => {
     try {
       const supabase = createClient();
-      const cleanEmail = email.trim().toLowerCase();
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: cleanEmail,
-        password,
+        email: email.trim().toLowerCase(),
+        password: pass,
       });
 
       if (error) {
@@ -183,60 +182,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setCurrentUser(profile);
       }
 
-      return { success: true, message: 'Sesión iniciada correctamente' };
+      return { success: true, message: 'Inicio de sesión exitoso' };
     } catch (err: any) {
       return { success: false, message: err.message || 'Error al iniciar sesión' };
     }
   }, [fetchUserProfile]);
 
-  const logout = useCallback(async () => {
+  const logout = useCallback(async (): Promise<void> => {
     try {
       const supabase = createClient();
       await supabase.auth.signOut();
-      setCurrentUser(null);
-    } catch (err) {
-      console.error('Logout error:', err);
+    } finally {
       setCurrentUser(null);
     }
   }, []);
 
-  const register = useCallback(async (name: string, email: string, password: string, lastName: string = ''): Promise<{ success: boolean; message: string }> => {
+  const register = useCallback(async (name: string, email: string, pass: string, lastName?: string): Promise<{ success: boolean; message: string }> => {
     try {
-      const supabase = createClient();
       const cleanEmail = email.trim().toLowerCase();
-      const siteUrl = typeof window !== 'undefined' && window.location.origin
-        ? window.location.origin
-        : (process.env.NEXT_PUBLIC_SITE_URL || 'https://sublilove.com');
+      const cleanName = name.trim();
+      const cleanLastName = (lastName || '').trim();
 
+      const supabase = createClient();
       const { data, error } = await supabase.auth.signUp({
         email: cleanEmail,
-        password,
+        password: pass,
         options: {
           data: {
-            name: name.trim(),
-            last_name: lastName.trim(),
+            name: cleanName,
+            last_name: cleanLastName,
+            full_name: `${cleanName} ${cleanLastName}`.trim(),
           },
-          emailRedirectTo: `${siteUrl}/login?confirmed=true`,
         },
       });
 
       if (error) {
+        if (error.message.includes('User already registered')) {
+          return { success: false, message: 'Ya existe una cuenta con este correo electrónico' };
+        }
         return { success: false, message: error.message };
       }
 
       if (data.user) {
-        await supabase.from('Users').upsert({
-          id: data.user.id,
-          name: name.trim(),
-          last_name: lastName.trim(),
-          mail: cleanEmail,
-          password: 'managed_by_auth',
-          role: 'cliente',
-          creation_date: new Date().toISOString(),
-          update_date: new Date().toISOString(),
-          deleted: false,
-        }, { onConflict: 'id' }).select();
-
         const profile = await fetchUserProfile(data.user.id, data.user.email, data.user.user_metadata);
         setCurrentUser(profile);
       }
@@ -249,77 +236,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const getUsers = useCallback(async (): Promise<User[]> => {
     try {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from('Users')
-        .select('*')
-        .eq('deleted', false)
-        .order('creation_date', { ascending: false });
-
-      if (error || !data) return [];
-      return data.map((u: any) => ({
-        id: u.id,
-        name: u.name || '',
-        last_name: u.last_name || '',
-        email: u.mail || '',
-        mail: u.mail || '',
-        role: u.role || 'cliente',
-        creation_date: u.creation_date,
-        update_date: u.update_date,
-        deleted: u.deleted,
-      }));
-    } catch {
+      const res = await fetch('/api/admin/users');
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        console.error('Error fetching users from API:', data.error || res.statusText);
+        return [];
+      }
+      const data = await res.json();
+      return data.users || [];
+    } catch (err) {
+      console.error('Network error fetching users:', err);
       return [];
     }
   }, []);
 
   const updateUser = useCallback(async (userIdOrEmail: string, updates: Partial<User>): Promise<{ success: boolean; message: string }> => {
     try {
-      const supabase = createClient();
-      const dbUpdates: any = {
-        update_date: new Date().toISOString(),
-      };
-      if (updates.name !== undefined) dbUpdates.name = updates.name.trim();
-      if (updates.last_name !== undefined) dbUpdates.last_name = updates.last_name.trim();
-      if (updates.email !== undefined) dbUpdates.mail = updates.email.trim();
-      if (updates.role !== undefined) dbUpdates.role = updates.role;
-
-      let query = supabase.from('Users').update(dbUpdates);
-      if (userIdOrEmail.includes('@')) {
-        query = query.eq('mail', userIdOrEmail);
-      } else {
-        query = query.eq('id', userIdOrEmail);
+      const res = await fetch(`/api/admin/users/${encodeURIComponent(userIdOrEmail)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        return { success: false, message: data.error || 'Error al actualizar usuario' };
       }
-
-      const { error } = await query;
-      if (error) return { success: false, message: error.message };
-
-      return { success: true, message: 'Usuario actualizado con éxito' };
-    } catch (err: any) {
-      return { success: false, message: err.message || 'Error al actualizar usuario' };
+      return { success: true, message: data.message || 'Usuario actualizado con éxito' };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error al actualizar usuario';
+      return { success: false, message };
     }
   }, []);
 
   const deleteUser = useCallback(async (userIdOrEmail: string): Promise<{ success: boolean; message: string }> => {
     try {
-      if (userIdOrEmail === 'admin@subli.com') {
-        return { success: false, message: 'No se puede eliminar la cuenta de Administrador Principal' };
+      const res = await fetch(`/api/admin/users/${encodeURIComponent(userIdOrEmail)}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        return { success: false, message: data.error || 'Error al eliminar usuario' };
       }
-
-      const supabase = createClient();
-      let query = supabase.from('Users').delete();
-      if (userIdOrEmail.includes('@')) {
-        query = query.eq('mail', userIdOrEmail);
-      } else {
-        query = query.eq('id', userIdOrEmail);
-      }
-
-      const { error } = await query;
-      if (error) return { success: false, message: error.message };
-
-      return { success: true, message: 'Usuario eliminado permanentemente de la base de datos' };
-    } catch (err: any) {
-      return { success: false, message: err.message || 'Error al eliminar usuario' };
+      return { success: true, message: data.message || 'Usuario eliminado permanentemente' };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error al eliminar usuario';
+      return { success: false, message };
     }
   }, []);
 

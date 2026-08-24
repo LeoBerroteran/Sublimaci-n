@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     template: '%s | Sublilove',
   },
   description:
-    'Tienda online de productos personalizados en sublimación y papelería creativa. Tazas, franelas, termos, libretas, agendas 2025, planners, stickers y empaques con tus diseños favoritos.',
+    'Tienda online de productos personalizados en sublimación y papelería creativa. Tazas, franelas, termos, libretas, agendas 2026, planners, stickers y empaques con tus diseños favoritos.',
   keywords: [
     'sublimación personalizada',
     'papelería creativa',
@@ -110,8 +110,8 @@ const organizationSchema = {
     addressCountry: 'VE',
   },
   sameAs: [
-    'https://instagram.com',
-    'https://facebook.com',
+    'https://www.instagram.com/subli_lover?igsh=MW5uOGV6dm1pemRsag==',
+    'https://www.facebook.com/share/1D4XtomhZa/',
   ],
 };
 
@@ -122,10 +122,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="icon" type="image/png" href="/img/logo.png" />
         <link rel="shortcut icon" type="image/png" href="/img/logo.png" />
         <link rel="apple-touch-icon" href="/img/logo.png" />
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-        />
         <JsonLd data={organizationSchema} />
       </head>
       <body>

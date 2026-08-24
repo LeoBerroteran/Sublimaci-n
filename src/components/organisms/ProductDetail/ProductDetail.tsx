@@ -37,13 +37,6 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
   const handleOrderWhatsApp = (e?: React.MouseEvent) => {
     if (e) e.preventDefault();
-
-    if (!isLoggedIn) {
-      showToast('Inicia sesión para realizar pedidos por WhatsApp', 'info');
-      router.push('/login');
-      return;
-    }
-
     const whatsappUrl = getWhatsAppUrl(product, selectedSize, quantity);
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   };

@@ -238,11 +238,15 @@ h6 { font-weight: 500; }
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 24px;
+  gap: 12px;
 }
 
 .nav-links {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -251,21 +255,23 @@ h6 { font-weight: 500; }
 
 .desktop-nav-links {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   list-style: none;
   margin: 0;
   padding: 0;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .nav-link {
-  padding: 8px 18px;
+  padding: 8px 14px;
   border-radius: var(--radius-sm);
   color: var(--text);
   font-weight: 500;
   font-size: 0.95rem;
   transition: var(--transition);
   display: block;
+  white-space: nowrap;
 }
 
 .nav-link:hover {
@@ -280,8 +286,9 @@ h6 { font-weight: 500; }
 
 .desktop-nav-actions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .mobile-hamburger-btn {
@@ -1042,8 +1049,8 @@ h6 { font-weight: 500; }
    13. RESPONSIVE BREAKPOINTS (Mobile-First Optimization)
    -------------------------------------------------------------------------- */
 
-/* Tablet & Mobile Breakpoint (<= 880px) */
-@media (max-width: 880px) {
+/* Tablet & Mobile Breakpoint (<= 1024px) */
+@media (max-width: 1024px) {
   .desktop-nav-links {
     display: none !important;
   }
