@@ -417,12 +417,30 @@ export default function ProductTable() {
 
       {/* PAGINATION CONTROLS */}
       {totalPages > 1 && (
-        <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <span style={{ fontSize: '0.88rem', color: 'var(--text-light)' }}>
+        <div
+          style={{
+            marginTop: '24px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '12px',
+            width: '100%',
+          }}
+        >
+          <span style={{ fontSize: '0.84rem', color: 'var(--text-light)', textAlign: 'center' }}>
             Mostrando {Math.min(filteredList.length, (currentPage - 1) * ITEMS_PER_PAGE + 1)} - {Math.min(filteredList.length, currentPage * ITEMS_PER_PAGE)} de {filteredList.length} productos
           </span>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              flexWrap: 'wrap',
+              maxWidth: '100%',
+            }}
+          >
             <button
               type="button"
               disabled={currentPage === 1}
@@ -430,18 +448,18 @@ export default function ProductTable() {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px',
-                padding: '6px 12px',
+                gap: '2px',
+                padding: '6px 10px',
                 borderRadius: 'var(--radius-sm)',
                 border: '1px solid var(--neutral-dark)',
                 backgroundColor: 'var(--white)',
                 color: 'var(--text)',
-                fontSize: '0.85rem',
+                fontSize: '0.82rem',
                 cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                opacity: currentPage === 1 ? 0.5 : 1,
+                opacity: currentPage === 1 ? 0.4 : 1,
               }}
             >
-              <ChevronLeft size={16} /> Anterior
+              <ChevronLeft size={15} /> Anterior
             </button>
 
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
@@ -450,15 +468,18 @@ export default function ProductTable() {
                 type="button"
                 onClick={() => goToPage(pageNum)}
                 style={{
-                  width: '32px',
-                  height: '32px',
+                  width: '30px',
+                  height: '30px',
                   borderRadius: 'var(--radius-sm)',
                   border: pageNum === currentPage ? '2px solid var(--primary)' : '1px solid var(--neutral-dark)',
                   backgroundColor: pageNum === currentPage ? 'var(--primary)' : 'var(--white)',
                   color: pageNum === currentPage ? '#ffffff' : 'var(--text)',
                   fontWeight: 600,
-                  fontSize: '0.85rem',
+                  fontSize: '0.82rem',
                   cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
                 {pageNum}
@@ -472,18 +493,18 @@ export default function ProductTable() {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px',
-                padding: '6px 12px',
+                gap: '2px',
+                padding: '6px 10px',
                 borderRadius: 'var(--radius-sm)',
                 border: '1px solid var(--neutral-dark)',
                 backgroundColor: 'var(--white)',
                 color: 'var(--text)',
-                fontSize: '0.85rem',
+                fontSize: '0.82rem',
                 cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                opacity: currentPage === totalPages ? 0.5 : 1,
+                opacity: currentPage === totalPages ? 0.4 : 1,
               }}
             >
-              Siguiente <ChevronRight size={16} />
+              Siguiente <ChevronRight size={15} />
             </button>
           </div>
         </div>

@@ -236,18 +236,18 @@ export default function CatalogView({ initialProducts, initialCategory }: Catalo
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '4px',
-                    padding: '8px 16px',
+                    padding: '7px 12px',
                     borderRadius: 'var(--radius-sm)',
                     border: '1px solid var(--neutral-dark)',
                     backgroundColor: 'var(--white)',
                     color: 'var(--text)',
-                    fontSize: '0.9rem',
+                    fontSize: '0.85rem',
                     cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
                     opacity: currentPage === 1 ? 0.5 : 1,
                     transition: 'all 0.2s ease',
                   }}
                 >
-                  <ChevronLeft size={18} /> Anterior
+                  <ChevronLeft size={16} /> Anterior
                 </button>
 
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
@@ -256,15 +256,19 @@ export default function CatalogView({ initialProducts, initialCategory }: Catalo
                     type="button"
                     onClick={() => goToPage(pageNum)}
                     style={{
-                      width: '38px',
-                      height: '38px',
+                      width: '34px',
+                      height: '34px',
                       borderRadius: 'var(--radius-sm)',
                       border: pageNum === currentPage ? 'none' : '1px solid var(--neutral-dark)',
                       backgroundColor: pageNum === currentPage ? 'var(--primary)' : 'var(--white)',
                       color: pageNum === currentPage ? '#ffffff' : 'var(--text)',
                       fontWeight: pageNum === currentPage ? 700 : 500,
+                      fontSize: '0.85rem',
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
                   >
                     {pageNum}
@@ -279,18 +283,18 @@ export default function CatalogView({ initialProducts, initialCategory }: Catalo
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '4px',
-                    padding: '8px 16px',
+                    padding: '7px 12px',
                     borderRadius: 'var(--radius-sm)',
                     border: '1px solid var(--neutral-dark)',
                     backgroundColor: 'var(--white)',
                     color: 'var(--text)',
-                    fontSize: '0.9rem',
+                    fontSize: '0.85rem',
                     cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
                     opacity: currentPage === totalPages ? 0.5 : 1,
                     transition: 'all 0.2s ease',
                   }}
                 >
-                  Siguiente <ChevronRight size={18} />
+                  Siguiente <ChevronRight size={16} />
                 </button>
               </div>
             )}
