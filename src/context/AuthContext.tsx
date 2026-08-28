@@ -205,12 +205,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const cleanEmail = email.trim().toLowerCase();
       const cleanName = name.trim();
       const cleanLastName = (lastName || '').trim();
+      const origin = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000');
 
       const supabase = createClient();
       const { data, error } = await supabase.auth.signUp({
         email: cleanEmail,
         password: pass,
         options: {
+          emailRedirectTo: `${origin}/auth/callback`,
           data: {
             name: cleanName,
             last_name: cleanLastName,

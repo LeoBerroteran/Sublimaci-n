@@ -17,7 +17,7 @@ export const DEFAULT_SETTINGS: StoreSettings = {
   whatsapp_phone: '584243695379',
   instagram_url: 'https://www.instagram.com/subli_lover?igsh=MW5uOGV6dm1pemRsag==',
   facebook_url: 'https://www.facebook.com/share/1D4XtomhZa/',
-  contact_email: 'info@subliypapeleria.com',
+  contact_email: '',
   exchange_rate_usd_ves: 60.5,
 };
 

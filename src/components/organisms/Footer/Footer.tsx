@@ -7,7 +7,7 @@ import Logo from '@/components/atoms/Logo/Logo';
 import WhatsAppIcon from '@/components/atoms/WhatsAppIcon/WhatsAppIcon';
 import { InstagramIcon, FacebookIcon } from '@/components/atoms/SocialIcons/SocialIcons';
 import { getContactWhatsAppUrl } from '@/lib/whatsapp';
-import { Mail, MapPin } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 
 export default function Footer() {
   const handleWhatsAppClick = (e: React.MouseEvent) => {
@@ -53,14 +53,6 @@ export default function Footer() {
                   style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
                 >
                   <WhatsAppIcon size={18} color="#25D366" /> WhatsApp: +58 424-3695379
-                </a>
-              </li>
-              <li>
-                <a
-                  href="mailto:info@subliypapeleria.com"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
-                >
-                  <Mail size={16} style={{ color: 'var(--primary-light)' }} /> info@subliypapeleria.com
                 </a>
               </li>
               <li>

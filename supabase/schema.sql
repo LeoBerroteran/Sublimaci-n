@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS public."Settings" (
   whatsapp_phone VARCHAR(50) NOT NULL DEFAULT '584243695379',
   instagram_url VARCHAR(255) DEFAULT 'https://www.instagram.com/subli_lover',
   facebook_url VARCHAR(255) DEFAULT 'https://www.facebook.com/share/1D4XtomhZa/',
-  contact_email VARCHAR(255) DEFAULT 'info@subliypapeleria.com',
+  contact_email VARCHAR(255) DEFAULT '',
   exchange_rate_usd_ves NUMERIC(10, 2) DEFAULT 60.50,
   update_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   CONSTRAINT single_row_settings CHECK (id = 1)
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS public."Settings" (
 
 -- Insert initial settings row if not exists
 INSERT INTO public."Settings" (id, business_name, whatsapp_phone, instagram_url, facebook_url, contact_email, exchange_rate_usd_ves)
-VALUES (1, 'Sublilove', '584243695379', 'https://www.instagram.com/subli_lover', 'https://www.facebook.com/share/1D4XtomhZa/', 'info@subliypapeleria.com', 60.50)
+VALUES (1, 'Sublilove', '584243695379', 'https://www.instagram.com/subli_lover', 'https://www.facebook.com/share/1D4XtomhZa/', '', 60.50)
 ON CONFLICT (id) DO NOTHING;
 
 -- ------------------------------------------------------------------------------
