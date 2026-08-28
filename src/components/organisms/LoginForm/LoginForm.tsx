@@ -15,14 +15,20 @@ function LoginFormContent() {
   const [submitting, setSubmitting] = useState(false);
   const [infoNotice, setInfoNotice] = useState<string | null>(null);
 
-  const { login } = useAuth();
+  const { login, isLoggedIn } = useAuth();
   const { showToast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    if (isLoggedIn) {
+      router.push('/');
+    }
+  }, [isLoggedIn, router]);
+
+  useEffect(() => {
     if (searchParams.get('registered') === 'true') {
-      setInfoNotice('¡Tu cuenta ha sido creada! Si requieres verificación, revisa tu correo electrónico para confirmarla.');
+      setInfoNotice('¡Tu cuenta ha sido creada! Revisa tu correo electrónico para confirmarla.');
     } else if (searchParams.get('confirmed') === 'true') {
       setInfoNotice('¡Correo confirmado con éxito! Ya puedes iniciar sesión con tus credenciales.');
     }

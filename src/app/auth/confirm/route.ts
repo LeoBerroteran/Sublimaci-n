@@ -18,7 +18,7 @@ export async function GET(request: Request) {
       if (!error) {
         return NextResponse.redirect(`${origin}${next}`);
       }
-      console.error('Error exchanging code for session:', error);
+      console.error('Error exchanging code for session in /auth/confirm:', error);
     }
 
     // 2. Verify OTP token_hash if present
@@ -27,7 +27,7 @@ export async function GET(request: Request) {
       if (!error) {
         return NextResponse.redirect(`${origin}${next}`);
       }
-      console.error('Error verifying token_hash:', error);
+      console.error('Error verifying token_hash in /auth/confirm:', error);
     }
 
     // 3. Check if user is already authenticated
@@ -36,9 +36,9 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}${next}`);
     }
   } catch (err) {
-    console.error('Auth callback exception:', err);
+    console.error('Auth confirm exception:', err);
   }
 
-  // If unable to authenticate automatically, redirect to login
+  // Fallback to login with confirmation parameter
   return NextResponse.redirect(`${origin}/login?confirmed=true`);
 }
