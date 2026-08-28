@@ -171,6 +171,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
+        if (error.message.includes('Email not confirmed')) {
+          return { success: false, message: 'Tu correo no ha sido confirmado aún. Por favor revisa tu bandeja de entrada o spam para activarlo.' };
+        }
         if (error.message.includes('Invalid login credentials')) {
           return { success: false, message: 'Correo o contraseña incorrectos' };
         }
@@ -223,16 +226,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { success: false, message: error.message };
       }
 
-      if (data.user) {
-        const profile = await fetchUserProfile(data.user.id, data.user.email, data.user.user_metadata);
-        setCurrentUser(profile);
-      }
+      // If email confirmation is required or session is not confirmed yet:
+      // Always sign out upon registration so the user is NOT logged in until they verify email
+      await supabase.auth.signOut().catch(() => {});
+      setCurrentUser(null);
 
-      return { success: true, message: 'Cuenta creada exitosamente. Si la confirmación está activa, por favor revisa tu correo electrónico.' };
+      return {
+        success: true,
+        message: 'Cuenta creada exitosamente. Por favor revisa tu correo electrónico para confirmar tu cuenta antes de iniciar sesión.',
+      };
     } catch (err: any) {
       return { success: false, message: err.message || 'Error al registrar usuario' };
     }
-  }, [fetchUserProfile]);
+  }, []);
 
   const getUsers = useCallback(async (): Promise<User[]> => {
     try {
